@@ -1,5 +1,6 @@
 {
     "python.analysis.extraPaths": [
-        "./backend/agents/investigators"
+        "./backend/agents/investigators",
+        "./backend/agents"
     ]
 }
