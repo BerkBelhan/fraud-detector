@@ -4,9 +4,12 @@ from backend.scraper.product_comments import navigate_to_full_comments, extract_
 from backend.scraper.seller import launch_driver as launch_seller_driver
 from backend.scraper.seller import get_seller_url_from_product, fetch_seller_reviews, extract_seller_info_and_reviews
 
-from backend.agents.investigators.comment_Investigator import evaluate_comments
-from backend.agents.investigators.seller_Investigator import evaluate_seller_comments
+from backend.agents.investigators.product_investigator import evaluate_product_comments
+from backend.agents.investigators.seller_investigator import evaluate_seller_comments
 from backend.agents.investigators.final_verdict_agent import evaluate_overall_verdict
+
+from backend.agents.controllers.product_controller import classify_product_analysis
+from backend.agents.controllers.seller_controller import classify_seller_analysis
 
 
 def run_product_analysis(product_url):
@@ -20,7 +23,10 @@ def run_product_analysis(product_url):
     driver.quit()
 
     comments = data["comments"]
-    feedback = evaluate_comments(comments)
+    feedback = evaluate_product_comments(comments)
+
+    feedback = classify_product_analysis(feedback)
+    print(f"🧠 Gemini Product Agent Feedback: {feedback}")
     return feedback, data
 
 
@@ -40,6 +46,9 @@ def run_seller_analysis(product_url):
 
     comments = seller_data["reviews"]
     feedback = evaluate_seller_comments(comments)
+
+    feedback = classify_seller_analysis(feedback)
+    print(f"🧠 Gemini Seller Agent Feedback: {feedback}")
     return feedback, seller_data
 
 

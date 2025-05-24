@@ -1,6 +1,6 @@
 import streamlit as st
-from backend.agents.investigators.comment_Investigator import evaluate_comments
-from backend.agents.investigators.seller_Investigator import evaluate_seller_comments
+from backend.agents.investigators.comment_investigator import evaluate_comments
+from backend.agents.investigators.seller_investigator import evaluate_seller_comments
 from backend.agents.investigators.final_verdict_agent import evaluate_overall_verdict
 
 from backend.scraper.product_comments import (
