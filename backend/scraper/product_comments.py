@@ -93,7 +93,7 @@ if __name__ == "__main__":
             print(f"{i}. {comment}")
 
         # Run Gemini if needed
-        from investigators.comment_Investigator import evaluate_comments
+        from backend.agents.investigators.comment_Investigator import evaluate_comments
         response = evaluate_comments(result['comments'])
         print("\n🧠 Gemini Evaluation Result:\n", response)
     else:
