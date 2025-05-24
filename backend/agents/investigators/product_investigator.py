@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # productReviewInvestigator.py (Version 2.0 - Refined for Robustness)
 
 import google.generativeai as genai
@@ -247,7 +247,7 @@ if __name__ == "__main__":
     ]
     analysis_scam = review_agent.evaluate_reviews(scam_reviews)
     print(json.dumps(analysis_scam, indent=2))
-=======
+
 # product_investigator.py
 from backend.utils.gemini_utils import model
 
@@ -276,4 +276,4 @@ def evaluate_product_comments(comments):
 
     response = model.generate_content(prompt)
     return response.text
->>>>>>> 99374cab0965bbeb8685705275477334aa270883
+
