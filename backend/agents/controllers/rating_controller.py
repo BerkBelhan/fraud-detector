@@ -13,10 +13,12 @@ def controller_agent(
     product_rating_count,
     seller_rating,
     seller_rating_count,
-    r_investigator_output
+    investigator_output,
+    scores_dict  # shared dictionary
 ):
-    if isinstance(r_investigator_output, dict):
-        investigator_output = r_investigator_output
+    # Ensure investigator_output is dict
+    if isinstance(investigator_output, str):
+        investigator_output = json.loads(investigator_output)
 
     prompt = f"""
 You are a meta-evaluation AI called the **Rating Controller Agent**.
@@ -45,13 +47,13 @@ Return your evaluation in valid JSON format:
 ```json
 {{
   "verdict": "Correct" | "Inconsistent" | "Invalid",
-  "score": float between 0.0 and 1.0
+  "score": float
 }}
 
 Be strict. Only mark the agent as "Correct" with a score > 0.85 if its reasoning and judgment are clearly aligned with the input.
 
 Investigator Output:
-{investigator_output}
+{json.dumps(investigator_output, indent=2)}
 
 Original Input:
 Product Rating: {product_rating} stars from {product_rating_count} reviews
@@ -59,19 +61,30 @@ Seller Rating: {seller_rating} stars from {seller_rating_count} reviews
 
 Give your final evaluation below in raw JSON only:
 """
-    
+
     response = model.generate_content(prompt)
-    return response.text
+
+    try:
+        eval_output = json.loads(response.text)
+    except Exception:
+        eval_output = {"verdict": "Invalid", "score": 0.0}
+
+    # Append this controller's score into the shared dictionary under its unique key
+    scores_dict["rating_controller"] = eval_output.get("score", 0.0)
+
+    # Return the updated dictionary (can also return the eval_output if needed)
+    return scores_dict
+
 
 investigator_json_output = {
 "verdict": "Safe",
 "reason": "Both product and seller have high ratings with significant review volumes, indicating overall trustworthiness."
 }
 
-print(controller_agent(
-product_rating=4.8,
-product_rating_count=1860,
-seller_rating=4.9,
-seller_rating_count=2600,
-investigator_output=investigator_json_output
-))
+#print(controller_agent(
+#product_rating=4.8,
+#product_rating_count=1860,
+#seller_rating=4.9,
+#seller_rating_count=2600,
+#investigator_output=investigator_json_output
+#))
