@@ -25,8 +25,9 @@ def run_product_analysis(product_url):
     comments = data["comments"]
     feedback = evaluate_product_comments(comments)
 
-    feedback = classify_product_analysis(feedback)
-    print(f"🧠 Gemini Product Agent Feedback: {feedback}")
+    ##added below 2 
+    product_classification = classify_product_analysis(feedback)
+    print(f"Product Classification: {product_classification}")
     return feedback, data
 
 
@@ -47,8 +48,9 @@ def run_seller_analysis(product_url):
     comments = seller_data["reviews"]
     feedback = evaluate_seller_comments(comments)
 
-    feedback = classify_seller_analysis(feedback)
-    print(f"🧠 Gemini Seller Agent Feedback: {feedback}")
+    ##added below 2
+    seller_classification = classify_seller_analysis(feedback)
+    print(f"Seller Classification: {seller_classification}")
     return feedback, seller_data
 
 
