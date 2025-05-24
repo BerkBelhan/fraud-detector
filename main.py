@@ -5,9 +5,11 @@ from backend.scraper.seller import launch_driver as launch_seller_driver
 from backend.scraper.seller import get_seller_url_from_product, fetch_seller_reviews, extract_seller_info_and_reviews
 
 from backend.agents.investigators.comment_Investigator import evaluate_comments
-from backend.agents.investigators.seller_investigator import evaluate_seller_comments
+
 from backend.agents.investigators.rating_investigator import evaluate_ratings
-from backend.agents.investigators.final_verdict_agent import evaluate_overall_verdict
+
+
+from backend.agents.controllers.seller_controller import seller_investigator_controller
 
 from backend.agents.controllers.rating_controller import controller_agent as rating_controller_agent
 from backend.agents.finalJudge import evaluate_overall_verdict as final_judge_agent
@@ -43,7 +45,7 @@ def run_seller_analysis(product_url):
     driver.quit()
 
     comments = seller_data["reviews"]
-    feedback = evaluate_seller_comments(comments)
+    feedback = seller_investigator_controller(comments)
     return feedback, seller_data
 
 def run_ratings_analysis(product_url):
@@ -132,12 +134,7 @@ if __name__ == "__main__":
     if isinstance(seller_feedback, dict) and "confidence" in seller_feedback:
         agent_outputs["seller_agent"] = seller_feedback["confidence"]
     #if isinstance(ratings_feedback, dict) and "confidence" in ratings_feedback:
-    #    agent_outputs["ratings_agent"] = ratings_feedback["confidence"]
-
-    # Here you could add other controllers if you have them, e.g.:
-    # agent_outputs["controller_3"] = some_other_controller(...)
-    # agent_outputs["controller_4"] = ...
-    # agent_outputs["controller_5"] = ...
+    #agent_outputs["ratings_agent"] = ratings_feedback["confidence"]
 
     REQUIRED_SIZE = 2
     if len(agent_outputs) >= REQUIRED_SIZE:

@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 import google.generativeai as genai
 
+
 load_dotenv()
 API_KEY = os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=API_KEY)
@@ -16,9 +17,8 @@ def controller_agent(
     investigator_output,
     scores_dict  # shared dictionary
 ):
-    # Ensure investigator_output is dict
-    if isinstance(investigator_output, str):
-        investigator_output = json.loads(investigator_output)
+
+    investigator_output = json.loads(investigator_output)
 
     prompt = f"""
 You are a meta-evaluation AI called the **Rating Controller Agent**.
@@ -81,10 +81,12 @@ investigator_json_output = {
 "reason": "Both product and seller have high ratings with significant review volumes, indicating overall trustworthiness."
 }
 
-#print(controller_agent(
-#product_rating=4.8,
-#product_rating_count=1860,
-#seller_rating=4.9,
-#seller_rating_count=2600,
-#investigator_output=investigator_json_output
-#))
+"""
+print(controller_agent(
+product_rating=4.8,
+product_rating_count=1860,
+seller_rating=4.9,
+seller_rating_count=2600,
+investigator_output=investigator_json_output
+))
+"""

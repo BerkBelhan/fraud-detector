@@ -51,12 +51,14 @@ Data:
     response = model.generate_content(prompt)
     return response.text
 
-r_investigator_output = evaluate_ratings(
+
+investigator_output = evaluate_ratings(
     product_rating=4.8,
     product_rating_count=1860,
     seller_rating=4.9,
     seller_rating_count=2600
 )
 
-print(r_investigator_output)
+#print(r_investigator_output)
+
 
