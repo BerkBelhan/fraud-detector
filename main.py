@@ -4,8 +4,8 @@ from backend.scraper.product_comments import navigate_to_full_comments, extract_
 from backend.scraper.seller import launch_driver as launch_seller_driver
 from backend.scraper.seller import get_seller_url_from_product, fetch_seller_reviews, extract_seller_info_and_reviews
 
-from backend.agents.investigators.evaluate_comments import evaluate_comments
-from backend.agents.investigators.seller_agent import evaluate_seller_comments
+from backend.agents.investigators.comment_Investigator import evaluate_comments
+from backend.agents.investigators.seller_Investigator import evaluate_seller_comments
 from backend.agents.investigators.final_verdict_agent import evaluate_overall_verdict
 
 
