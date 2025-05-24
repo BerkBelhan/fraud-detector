@@ -1,47 +1,29 @@
-import json
+from backend.utils.gemini_utils import model
 
-def seller_investigator_controller(investigator_output: str) -> dict:
+def classify_seller_analysis(paragraph):
     """
-    Processes the output from the seller investigator and returns a structured response.
-
-    Returns:
-        dict: A dictionary containing the verdict and reason extracted from the investigator output.
+    Given a paragraph analysis from seller_investigator, classify the seller's trust level.
+    Return a JSON verdict and short reason.
     """
+    prompt = f"""
+    You are a controller agent for e-commerce fraud detection.
 
-    try:
-        parsed = json.loads(investigator_output)
-        verdict = parsed.get("verdict", "").lower()
-        reason = parsed.get("reason", "")
-        user_friendly_reason = parsed.get("user_friendly_reason", "")
+    Based on the following paragraph that summarizes user comments about a **seller**, classify the seller as:
+    - "Safe" if users mostly trust them and complaints are minor (e.g. wrong color).
+    - "Suspicious" if there are multiple complaints or worrying patterns, but it's not clearly a scam.
+    - "Likely Scam" if there's strong indication of fraud, scam, or undelivered orders.
 
-        if verdict not in ["safe", "suspicious", "likely scam"]:
-            raise ValueError("Invalid verdict value. Must be one of 'safe', 'suspicious', or 'likely scam'.")
-        
-        risk_score = {
-            "safe": 0,
-            "suspicious": 50,
-            "likely scam": 90
-        }
-        score = risk_score[verdict]
+    Return a structured JSON object like this:
+    {{
+      "verdict": "Safe" | "Suspicious" | "Likely Scam",
+      "reason": "A brief explanation extracted from the paragraph."
+    }}
 
-        return {
-            "agent": "sellerInvestigator",
-            "verdict": verdict,
-            "reasoning": reason,
-            "user_friendly_reason": user_friendly_reason,
-            "score": score,
-            "flagged": verdict != "safe",
-            "source": "seller_reviews"
-        }
-    
-    except json.JSONDecodeError:
-        return{
-            "error": "Invalid JSON format in investigator output.",
-            "raw_output": investigator_output #returns the raw output for debugging we dont occasioanlly need this.
-        }
-    
-    except Exception as e:
-        return {
-            "error": str(e),
-            "raw_output": investigator_output  # for debugging
-        }
+    Only use the given paragraph — do not invent new insights.
+
+    ---
+    Seller Analysis Paragraph:
+    {paragraph}
+    """
+    response = model.generate_content(prompt)
+    return response.text

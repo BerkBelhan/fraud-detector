@@ -1,5 +1,9 @@
 .env
+<<<<<<< HEAD
 # Python cache
 __pycache__/
 *.pyc
+=======
+__pycache__
+>>>>>>> 99374cab0965bbeb8685705275477334aa270883
 .venv

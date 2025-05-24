@@ -1,33 +1,21 @@
-import os
-from dotenv import load_dotenv
-import google.generativeai as genai
+from backend.utils.gemini_utils import model
 
-load_dotenv()  # Loads .env
-
-API_KEY = os.getenv("GEMINI_API_KEY")
-genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel("gemini-1.5-flash-latest")
 def evaluate_seller_comments(comments):
     """
     Evaluates seller comments to determine trustworthiness.
     Args:
         comments (list): List of seller review comments.
     Returns:
-        str: JSON response with verdict and reason.
+        str: A concise evaluation paragraph summarizing trustworthiness, delivery issues, scams, and patterns in complaints.   
     """
     joined_comments = "\n".join(comments)
     prompt = f"""
-    You are a seller trust evaluator. 
+    Analyze the following user comments about a seller. Focus on trustworthiness, delivery issues, scams, and patterns in complaints. Do **not** return a JSON. Instead, write a concise and clear paragraph summarizing your evaluation.
 
-    Analyze these reviews and return a structured JSON response.
+    Be honest, but cautious. If the comments seem mostly harmless (e.g., wrong color or minor delays), say that it's likely a good seller but minor mistakes occurred.
 
-    Response format:
-    {{
-      "verdict": "Safe" | "Suspicious" | "Likely Scam",
-      "reason": "short explanation"
-      "user_friendly_reason": "Explanation understandable by a normal user (e.g., 'Some users received the wrong color or size, which may not be a scam but requires caution.')"
-    }}
-
+    Include a suggestion for the user: whether to proceed, proceed with caution, or avoid.
+    ---
     Seller reviews:
     {joined_comments}
     """
