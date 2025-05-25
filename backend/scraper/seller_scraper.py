@@ -67,14 +67,23 @@ def extract_seller_info(html):
             key = spans[0].text
             value = spans[1].text
             seller_dictionary[key] = value
-        rating = soup.find('span', class_='product-review-section-wrapper__wrapper__rating_wrapper_left__rating_value').text
+        rating = soup.find('span', class_='product-review-section-wrapper__wrapper__rating_wrapper_left__rating_value').text + "/5"
         reviews = soup.find_all('span', class_='product-review-section__review-count')
         review_count = reviews[0].text
         comment_count = reviews[1].text
+
+        follower_count = soup.find('div', class_='followV2-text').text
+        provider_name = soup.find('h1', class_='seller-store__name seller-info__name ss-header-seller').text
+        general_score = soup.find('div', class_='seller-store__score score-actual ss-header-score').text + "/10"
+        is_blue_tick_exist = "Evet" if "verified-seller-marker.svg" in html else "Hayır"
         
-        seller_dictionary['Rating'] = rating
+        seller_dictionary['Toplam Sattığı Ürünlerin Ortalama Ratingi'] = rating
         seller_dictionary['Değerlendirme sayısı'] = review_count
-        seller_dictionary['Yorum sayısı'] = comment_count
+        seller_dictionary['Tüm Satış Ürünlerinde Toplam Yorum sayısı'] = comment_count
+        seller_dictionary['Takipçi sayısı'] = follower_count
+        seller_dictionary['Satıcı adı'] = provider_name
+        seller_dictionary['Genel Puan'] = general_score
+        seller_dictionary['Mavi tik var mı'] = is_blue_tick_exist
 
         return seller_dictionary
     except:
