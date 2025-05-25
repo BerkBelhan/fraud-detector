@@ -15,7 +15,7 @@ if project_root not in sys.path:
 
 # --- Frontend & Backend Imports ---
 from ui_config import GENIE_IMAGE_PATH, GENIE_PERSONA_DIALOGUE, extract_json_from_response
-from backend.pipeliner import run_analysis_pipeline
+from backend.pipeliner import run_analysis_pipeline # Assuming this is the pipeliner.py you confirmed
 
 # --- Page Config ---
 st.set_page_config(
@@ -72,18 +72,14 @@ def display_final_verdict(final_verdict_str):
 
 # --- Main App Logic ---
 
-# Initialize session state for multi-view UI
 if 'view' not in st.session_state:
     st.session_state.view = 'input'
 if 'results' not in st.session_state:
     st.session_state.results = {}
 
-# Load CSS
 load_external_css(os.path.join(script_dir, "styles.css"))
-
 st.markdown("<h1 class='main-title'>Scaminator</h1>", unsafe_allow_html=True)
 
-# Main two-column layout
 left_col, right_col = st.columns([1, 1.5], gap="large")
 
 with left_col:
@@ -108,17 +104,50 @@ with right_col:
                 st.rerun()
 
     elif st.session_state.view == 'processing':
-        with st.spinner("The Scaminator is consulting the digital spirits..."):
+        # --- Letter-by-letter "Deep Thinking" Animation ---
+        thinking_placeholder = st.empty()
+        thinking_steps = [
+            "Initializing cosmic scrapers...",
+            "Probing product page for review emanations...",
+            "Scrutinizing seller's ethereal presence...",
+            "Transmitting data to the investigator spirits...",
+            "Product spirit is weaving a summary...",
+            "Seller spirit is discerning patterns...",
+            "Consulting controller entities for classification...",
+            "Finalizing spectral reports...",
+            "Summoning the final judge for the ultimate decree..."
+        ]
+        full_thought_process = "\n".join(f"• {step}" for step in thinking_steps)
+        displayed_text = ""
+        base_html = '<div class="thinking-bar"><pre style="white-space: pre-wrap; word-wrap: break-word;"><code>{}</code></pre></div>'
+        
+        for char_index, char in enumerate(full_thought_process):
+            displayed_text += char
+            cursor = "▌" if char_index % 2 == 0 else " " 
+            thinking_placeholder.markdown(base_html.format(displayed_text + cursor), unsafe_allow_html=True)
+            time.sleep(0.015) 
+
+        thinking_placeholder.markdown(base_html.format(displayed_text), unsafe_allow_html=True) # Final text
+        time.sleep(0.5) # Pause after animation before clearing
+        thinking_placeholder.empty() # Clear the animation placeholder
+
+        # Now show the spinner for the actual pipeline execution
+        with st.spinner(GENIE_PERSONA_DIALOGUE['thinking']): 
             try:
                 final_output, intermediate_data = run_analysis_pipeline(st.session_state.product_url)
                 st.session_state.results['final_verdict_str'] = final_output
+                
+                # --- KEY CORRECTION HERE ---
+                # Using keys that match your confirmed pipeliner.py output
                 st.session_state.results['product_json'] = extract_json_from_response(intermediate_data.get("Product Analysis JSON", {}))
                 st.session_state.results['seller_json'] = extract_json_from_response(intermediate_data.get("Seller Analysis JSON", {}))
+                # --- END KEY CORRECTION ---
+
                 st.session_state.results['raw_data'] = intermediate_data
                 st.session_state.view = 'results'
                 st.rerun()
             except Exception as e:
-                st.error(f"A critical error occurred: {e}")
+                st.error(f"A critical error occurred during pipeline execution: {e}")
                 st.session_state.view = 'input'
                 st.rerun()
 
