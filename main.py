@@ -142,6 +142,7 @@ if __name__ == "__main__":
         final_result = final_judge_agent(agent_outputs)
         print(f"\n🚦 Final Verdict: {final_result['verdict']}")
         print(f"📌 Reason: {final_result['reason']}")
+        print(f"🔍 Agent Outputs: {agent_outputs}")
         #sys.exit(0)
     else:
         print(f"\n⚠️ Waiting for more agents... Current: {len(agent_outputs)}, Required: {REQUIRED_SIZE}")
