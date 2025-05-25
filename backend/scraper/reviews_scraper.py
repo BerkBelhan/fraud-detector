@@ -1,10 +1,12 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import time
 from bs4 import BeautifulSoup
 
-def fetch_with_selenium(url):
+def fetch_with_selenium(url, wait_for=False):
     options = Options()
     user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36'
     options.add_argument(f'user-agent={user_agent}')
@@ -13,7 +15,12 @@ def fetch_with_selenium(url):
     driver = webdriver.Chrome(options=options)
     try:
         driver.get(url)
-        time.sleep(2)  # Wait for the page to load
+        if wait_for:
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.CLASS_NAME, wait_for))
+            )
+        else:
+            time.sleep(4)
         html = driver.page_source
     except:
         driver.quit()
@@ -22,7 +29,7 @@ def fetch_with_selenium(url):
     return html
 
 def extract_review(html):
-
+    try:
         soup = BeautifulSoup(html, 'html.parser')
         rating = soup.find('div', attrs={'class': 'ps-ratings__count-text'}).text
         reviews = soup.find_all('div', attrs={'class': 'ps-ratings__count'})
@@ -33,11 +40,29 @@ def extract_review(html):
         if len(reviews) == 0:
             return 1
         return [[rating, review_count, comment_count]] + [review.text for review in reviews]
+    except:
+        return 2
+
+def link_parse(url):
+    new_url = ""
+    if url.startswith("https://"):
+        new_url += "https://"
+        url = url[8:]
+        
+    url = url.split('/')
+    for i in range(3):
+        if i == 2:
+            new_url += url[i].split('?')[0]
+        else:
+            new_url += url[i] + "/"
+    return new_url
 
 def scrape_reviews(url):
-    html = fetch_with_selenium(url)
+    html = fetch_with_selenium(url, wait_for='reviews-content')
     if html == 0:
         return 0
+    if html == 1:
+        return 1
     return extract_review(html)
 
 def process_url(url):
@@ -62,11 +87,10 @@ def format_reviews(reviews):
     return formatted_text
 
 def get_reviews(url):
-    reviews = scrape_reviews(process_url(url))
+    url = process_url(link_parse(url))
+    reviews = scrape_reviews(url)
     return format_reviews(reviews)
 
 if __name__ == "__main__":
     url = input("Enter the URL: ")
-    reviews = scrape_reviews(process_url(url))
-    formatted_reviews = format_reviews(reviews)
-    print(formatted_reviews)
+    print(get_reviews(url))
