@@ -22,17 +22,21 @@ def fetch_with_selenium(url):
     return html
 
 def extract_review(html):
+    soup = BeautifulSoup(html, 'html.parser')
+    
+    rating = soup.find('div', attrs={'class': 'ps-ratings__count-text'}).text
+    reviews = soup.find_all('div', attrs={'class': 'ps-ratings__count'})
+    review_count = reviews[0].text 
+    comment_count = reviews[1].text
+    
+    comments = soup.find_all('div', attrs={'class': 'comment-text'})
+    
+    if len(comments) == 0:
+        return 1
+    
+    summary = f"Rating: {rating}, Review Count: {review_count}, Comment Count: {comment_count}"
+    return [summary] + [comment.text.strip() for comment in comments]
 
-        soup = BeautifulSoup(html, 'html.parser')
-        rating = soup.find('div', attrs={'class': 'ps-ratings__count-text'}).text
-        reviews = soup.find_all('div', attrs={'class': 'ps-ratings__count'})
-        review_count = reviews[0].text 
-        comment_count = reviews[1].text
-        desc = soup.find('div', attrs={'class': 'reviews'})
-        reviews = soup.find_all('div', attrs={'class': 'comment-text'})
-        if len(reviews) == 0:
-            return 1
-        return [[rating, review_count, comment_count]] + [review.text for review in reviews]
 
 def scrape_reviews(url):
     html = fetch_with_selenium(url)

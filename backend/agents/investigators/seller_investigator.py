@@ -21,3 +21,4 @@ def evaluate_seller_comments(comments):
     """
     response = model.generate_content(prompt)
     return response.text
+

@@ -2,26 +2,22 @@
 from backend.utils.gemini_utils import model
 
 def evaluate_product_comments(comments):
-    joined_comments = "\n".join(comments)
+    from backend.utils.gemini_utils import model  # or however you're loading Gemini
+
+    # Flatten nested lists
+    flat_comments = []
+    for item in comments:
+        if isinstance(item, list):
+            flat_comments.extend(item)
+        elif isinstance(item, str):
+            flat_comments.append(item)
+
+    joined_comments = "\n".join(flat_comments)
+
     prompt = f"""
-    You are a product fraud detection assistant.
-
-    Your job is to analyze user comments about a specific product and assess whether there are signs of fraud or low product quality.
-
-    Read the following comments carefully and provide a clear and concise paragraph summary.
-
-    If users mention repeated complaints (fake product, refund issues, wrong items, dangerous items), mention this and warn the user.
-
-    If comments are mostly positive but have a few minor complaints (delays, packaging issues), note that too and recommend they proceed with caution.
-
-    In the end, suggest:
-    - Proceed
-    - Proceed with caution
-    - Avoid
-
-    ---
-    User Comments:
-    {joined_comments}
+    You are an agent analyzing product reviews. Here are some recent reviews:\n
+    {joined_comments}\n
+    Summarize the tone, spot suspicious patterns (like fake reviews), and generate a short paragraph summary.
     """
 
     response = model.generate_content(prompt)
