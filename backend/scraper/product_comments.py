@@ -1,3 +1,5 @@
+# File: backend/scraper/product_comments.py
+
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -10,92 +12,57 @@ import time
 
 def launch_driver():
     options = Options()
-    # options.add_argument("--headless")  # Enable headless if needed
+    # options.add_argument("--headless")
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("log-level=3") 
     return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
 def navigate_to_full_comments(driver, product_url):
     driver.get(product_url)
-    wait = WebDriverWait(driver, 10)
-    time.sleep(1)
+    time.sleep(2) 
 
-    # Incrementally scroll to make sure button loads
-    print("🔽 Scrolling to find 'Tüm Yorumları Göster' button...")
-    button = None
-    scroll_y = 500
-    while scroll_y < 5000:
-        driver.execute_script(f"window.scrollTo(0, {scroll_y});")
+    try:
+        # Using a more general selector that finds the link to all reviews
+        all_reviews_button = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, "a[href*='/yorumlar']"))
+        )
+        driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", all_reviews_button)
         time.sleep(0.5)
-        try:
-            button = driver.find_element(By.CSS_SELECTOR, "button.navigate-all-reviews-btn")
-            if button.is_displayed():
-                break
-        except:
-            pass
-        scroll_y += 300
-
-    if button:
-        try:
-            driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", button)
-            time.sleep(1)
-            driver.execute_script("arguments[0].click();", button)
-            print("✅ Clicked 'Tüm Yorumları Göster'")
-            time.sleep(3)
-            return True
-        except Exception as e:
-            print(f"❌ Failed to click the button: {e}")
-    else:
-        print("⚠️ Button not found after scrolling.")
-
-    return False
+        driver.execute_script("arguments[0].click();", all_reviews_button)
+        print("✅ Navigated to all reviews page.")
+        return True
+    except Exception:
+        print("⚠️ Could not navigate to a separate reviews page. Will scrape comments from the main product page.")
+        # This is not a failure; we can still proceed.
+        return True
 
 def extract_product_reviews(driver):
+    
+    # --- FIX: ADDING AN INTELLIGENT WAIT ---
+    # Instead of a fixed sleep, we will wait up to 10 seconds for the
+    # first comment element to appear in the HTML.
+    # We use your original 'div.comment-text' selector here.
+    try:
+        print("Waiting for review comments to load...")
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "div.comment-text"))
+        )
+        print("✅ Comments loaded successfully.")
+    except Exception:
+        # If after 10 seconds nothing is found, we print a clear message.
+        print("❌ Timed out waiting for comments to load. The page may have no reviews or the layout has changed.")
+        return {'comments': []} # Return empty list to be handled gracefully
+
+    # Now that we know the comments are present, we can safely parse the page
     soup = BeautifulSoup(driver.page_source, 'html.parser')
-
-    try:
-        rating = soup.find('div', class_='ps-ratings__count-text').get_text(strip=True)
-    except:
-        rating = 'Rating not found'
-
-    try:
-        counts = soup.find_all('div', class_='ps-ratings__count')
-        review_count = counts[0].get_text(strip=True) if len(counts) > 0 else 'Review count not found'
-        comment_count = counts[1].get_text(strip=True) if len(counts) > 1 else 'Comment count not found'
-    except:
-        review_count = 'Review count not found'
-        comment_count = 'Comment count not found'
-
+    
     comment_elements = soup.find_all('div', class_='comment-text')
     comments = [c.get_text(strip=True) for c in comment_elements]
+    
+    print(f"✅ Found {len(comments)} product comments.")
 
     return {
-        'rating': rating,
-        'review_count': review_count,
-        'comment_count': comment_count,
-        'comments': comments[:10]  # limit to top 10
+        'comments': comments[:20] 
     }
-
-if __name__ == "__main__":
-    product_url = input("🔗 Enter Trendyol product URL: ").strip()
-    driver = launch_driver()
-
-    success = navigate_to_full_comments(driver, product_url)
-    if success:
-        result = extract_product_reviews(driver)
-        driver.quit()
-
-        print(f"\n⭐ Product Rating: {result['rating']}")
-        print(f"📊 Total Reviews: {result['review_count']} | Total Comments: {result['comment_count']}")
-        print("📝 Top 10 Product Comments:")
-        for i, comment in enumerate(result['comments'], 1):
-            print(f"{i}. {comment}")
-
-        # Run Gemini if needed
-        from evaluate_comments import evaluate_comments
-        response = evaluate_comments(result['comments'])
-        print("\n🧠 Gemini Evaluation Result:\n", response)
-    else:
-        print("❌ Could not complete process.")
-        driver.quit()

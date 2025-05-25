@@ -1,0 +1,143 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Marcellus&display=swap');
+
+.stApp { 
+    background-color: #181D31; /* Deep indigo/midnight blue */
+    background-image: radial-gradient(circle at top right, rgba(121, 68, 154, 0.3) 0%, transparent 40%),
+                      radial-gradient(circle at bottom left, rgba(88, 24, 69, 0.3) 0%, transparent 40%);
+}
+
+h1.main-title { 
+    font-family: 'Cinzel', serif;
+    font-size: 5.5rem; /* Or your desired size */
+    color: #FFD700;
+    text-align: center;
+    text-shadow: 0 0 1px #FFD700, 0 0 5px #FFD700, 0 0 10px #DAA520, 2px 2px 2px #000;
+    margin-bottom: 30px;
+}
+
+.genie-column { /* For the column holding the Genie image */
+    /* background-image: radial-gradient(ellipse at center, rgba(255, 223, 186, 0.15) 0%, transparent 70%); */
+}
+
+p.genie-speech { 
+    font-family: 'Marcellus', serif; 
+    font-size: 1.3rem; 
+    text-align: left; 
+    font-weight: normal;
+    color: #E0E0E0; 
+    line-height: 1.7; 
+    text-shadow: 1px 1px 2px #000000; 
+}
+
+/* --- Finding Box Base & Verdict Specific Styles --- */
+
+.finding-box { 
+    background-color: rgba(10, 10, 25, 0.5); 
+    border-radius: 15px;
+    padding: 25px; 
+    margin-top: 20px; 
+    margin-bottom: 20px; 
+    border-width: 1px;
+    border-style: solid;
+    transition: border-color 0.5s, box-shadow 0.5s;
+}
+
+.finding-box h4 { 
+    font-family: 'Cinzel', serif;
+    color: #FFD700; 
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+}
+
+.finding-box .verdict { 
+    font-family: 'Cinzel', serif; 
+    font-weight: 700; 
+    font-size: 1.6rem; 
+    margin-bottom: 10px; 
+    transition: color 0.5s;
+}
+
+.finding-box .reason { 
+    font-family: 'Marcellus', serif; 
+    font-size: 1.1rem; 
+    color: #D1D1D1; 
+    line-height: 1.6; 
+}
+
+/* SAFE (Green) */
+.finding-box.safe {
+    border-color: #2ECC71;
+    box-shadow: 0 0 15px rgba(46, 204, 113, 0.4);
+}
+.verdict.safe {
+    color: #2ECC71;
+}
+
+/* SUSPICIOUS (Orange) */
+.finding-box.suspicious {
+    border-color: #F39C12;
+    box-shadow: 0 0 15px rgba(243, 156, 18, 0.4);
+}
+.verdict.suspicious {
+    color: #F39C12;
+}
+
+/* SCAM (Red) */
+.finding-box.scam {
+    border-color: #E74C3C;
+    box-shadow: 0 0 15px rgba(231, 76, 60, 0.4);
+}
+.verdict.scam {
+    color: #E74C3C;
+}
+
+/* UNKNOWN/DEFAULT (Gold) */
+.finding-box.unknown {
+    border-color: #FFD700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+.verdict.unknown {
+    color: #FFD700;
+}
+
+
+.speech-bubble { 
+    position: relative; 
+    background: linear-gradient(145deg, #1a1f36, #232a4a); 
+    border-radius: .6em; 
+    padding: 25px; 
+    border: 1px solid #FFD700; 
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+}
+.speech-bubble:after { 
+    content: ''; position: absolute; left: 0; top: 50px; 
+    width: 0; height: 0; border: 20px solid transparent; 
+    border-right-color: #232a4a; 
+    border-left: 0; margin-top: -20px; margin-left: -20px; 
+}
+
+.stButton>button {
+    border: 2px solid #FFD700;
+    background-color: transparent;
+    color: #FFD700;
+    padding: 12px 28px;
+    border-radius: 8px;
+    font-family: 'Cinzel', serif;
+    font-weight: bold;
+    font-size: 1.1rem;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+}
+.stButton>button:hover {
+    background-color: #FFD700;
+    color: #181D31; 
+    box-shadow: 0 0 15px #FFD700;
+}
+.stButton>button:active {
+    background-color: #DAA520 !important; 
+    color: #181D31 !important;
+}
+
+#MainMenu, footer { 
+    visibility: hidden; 
+}
