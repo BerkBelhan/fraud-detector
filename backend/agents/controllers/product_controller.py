@@ -18,6 +18,7 @@ def classify_product_analysis(paragraph):
     {{
       "verdict": "Safe" | "Suspicious" | "Likely Scam",
       "reason": "A short, clear summary (1-2 sentences) extracted from the analysis."
+    
     }}
     
 

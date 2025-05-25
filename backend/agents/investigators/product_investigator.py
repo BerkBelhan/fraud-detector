@@ -1,23 +1,22 @@
 # C:\SENG472\MainProje\fraud-detector\backend\agents\investigators\product_investigator.py
 
-import google.generativeai as genai
-import os
-import json
+def evaluate_product_comments(comments):
+    from backend.utils.gemini_utils import model  # or however you're loading Gemini
 
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-    GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-    if not GOOGLE_API_KEY:
-        raise ValueError("GOOGLE_API_KEY not found in .env file or environment.")
-    genai.configure(api_key=GOOGLE_API_KEY)
-except (ImportError, ValueError) as e:
-    print(f"CRITICAL ERROR: {e}")
-    exit()
+    # Flatten nested lists
+    flat_comments = []
+    for item in comments:
+        if isinstance(item, list):
+            flat_comments.extend(item)
+        elif isinstance(item, str):
+            flat_comments.append(item)
 
-class ProductReviewInvestigator:
-    """
-    An agent that specializes in analyzing product reviews to detect signs of fraud.
+    joined_comments = "\n".join(flat_comments)
+
+    prompt = f"""
+    You are an agent analyzing product reviews. Here are some recent reviews:\n
+    {joined_comments}\n
+    Summarize the tone, spot suspicious patterns (like fake reviews), and generate a short paragraph summary.
     """
 
     def __init__(self, model_name="gemini-1.5-flash-latest"):
