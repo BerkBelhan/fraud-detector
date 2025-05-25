@@ -1,5 +1,8 @@
 import streamlit as st
 from annotated_text import annotated_text
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from backend.pipeliner import run_analysis_pipeline
 
 # Sidebar
