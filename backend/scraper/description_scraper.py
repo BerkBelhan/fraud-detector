@@ -43,10 +43,11 @@ def format(desc):
     description, tech_specs = desc
     formatted_text = ""
     bilgilendirme = ""
-    passed = False
     if len(description.items()) > 5:
-        for i, item in description.items()[5:]:
-            bilgilendirme += f"{i}. {item}\n"
+        for i, item in description.items():
+            if i <= 4:
+                continue
+            bilgilendirme += f"{i-5}. {item}\n"
 
     if bilgilendirme != "":
         formatted_text += "Ürün Bilgilendirmesi:\n\n"+ bilgilendirme
@@ -55,8 +56,6 @@ def format(desc):
 
     for key, value in tech_specs.items():
         formatted_text += f"{key}: {value}\n"
-
-    print(formatted_text)
 
     return formatted_text
 
@@ -68,10 +67,7 @@ def link_parse(url):
         
     url = url.split('/')
     for i in range(3):
-        if i == 2:
-            new_url += url[i].split('?')[0]
-        else:
-            new_url += url[i] + "/"
+        new_url += url[i] + "/"
     return new_url
 
 def get_description(url):
