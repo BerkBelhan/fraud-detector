@@ -1,6 +1,7 @@
 from google.genai import types
+import time
 
-def evaluate_product_comments(comments):
+def evaluate_product_comments(comments, thinking_placeholder, base_html):
     from backend.utils.gemini_utils import client  # or however you're loading Gemini
 
     instruction = """
@@ -13,7 +14,15 @@ Also return good results for products that have good comments.
 You will see average rating from 1 to 5, where 1 is the worst and 5 is the best. You have to analyze this rating and give your insights about it.
 Comments will be written in Turkish, so you should understand Turkish.
 You will see comments count and reviews count. It's another metric you should analyze.
+Your output have to be in English excluding Turkish comments and it should be formal and professional.
 """
+
+    investigator = "Investigating the product reviews and comments"
+    text = ""
+    for char in investigator:
+        text += char
+        thinking_placeholder.markdown(base_html.format(text), unsafe_allow_html=True)
+        time.sleep(0.00003)
     
     response = client.models.generate_content(
         model='gemini-2.0-flash',
@@ -26,5 +35,13 @@ You will see comments count and reviews count. It's another metric you should an
             top_k=5,
             seed=42
         ),
-    )
-    return response.text
+    ).text
+
+    base_response = response[:200]
+    text += "<br>"
+    for char in base_response:
+        text += char
+        thinking_placeholder.markdown(base_html.format(text), unsafe_allow_html=True)
+        time.sleep(0.00003)
+
+    return response

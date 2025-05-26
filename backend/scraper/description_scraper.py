@@ -41,10 +41,16 @@ def format(desc):
         return "Ürün açıklaması bulunamadı, site değişmiş olabilir."
 
     description, tech_specs = desc
-    formatted_text = "Ürün Bilgilendirmesi:\n\n"
+    formatted_text = ""
+    bilgilendirme = ""
+    if len(description.items()) > 5:
+        for i, item in description.items():
+            if i <= 4:
+                continue
+            bilgilendirme += f"{i-5}. {item}\n"
 
-    for i, item in description.items():
-        formatted_text += f"{i}. {item}\n"
+    if bilgilendirme != "":
+        formatted_text += "Ürün Bilgilendirmesi:\n\n"+ bilgilendirme
 
     formatted_text += "\nTeknik Özellikler:\n\n"
 
@@ -61,10 +67,7 @@ def link_parse(url):
         
     url = url.split('/')
     for i in range(3):
-        if i == 2:
-            new_url += url[i].split('?')[0]
-        else:
-            new_url += url[i] + "/"
+        new_url += url[i] + "/"
     return new_url
 
 def get_description(url):

@@ -51,23 +51,12 @@ def display_finding(icon, title, feedback_dict):
         f'</div>', unsafe_allow_html=True)
 
 def display_final_verdict(final_verdict_str):
-    try:
-        verdict, reason = final_verdict_str.split('\n', 1)
-    except (ValueError, AttributeError):
-        verdict = "Analysis Error"
-        reason = "The final verdict could not be parsed correctly."
 
-    verdict_lower = verdict.lower()
-    if "safe" in verdict_lower: verdict_class = "safe"
-    elif "caution" in verdict_lower: verdict_class = "suspicious"
-    elif "scam" in verdict_lower or "error" in verdict_lower: verdict_class = "scam"
-    else: verdict_class = "unknown"
 
     st.markdown(
-        f'<div class="final-verdict-box {verdict_class}">'
+        f'<div class="final-verdict-box">'
         f'  <p class="final-verdict-title">Final Verdict</p>'
-        f'  <p class="final-verdict-text {verdict_class}">{verdict.strip().upper()}</p>'
-        f'  <p class="final-reason">{reason.strip()}</p>'
+        f'  <p class="final-verdict-text">{final_verdict_str}</p>'
         f'</div>', unsafe_allow_html=True)
 
 # --- Main App Logic ---
@@ -106,35 +95,12 @@ with right_col:
     elif st.session_state.view == 'processing':
         # --- Letter-by-letter "Deep Thinking" Animation ---
         thinking_placeholder = st.empty()
-        thinking_steps = [
-            "Initializing cosmic scrapers...",
-            "Probing product page for review emanations...",
-            "Scrutinizing seller's ethereal presence...",
-            "Transmitting data to the investigator spirits...",
-            "Product spirit is weaving a summary...",
-            "Seller spirit is discerning patterns...",
-            "Consulting controller entities for classification...",
-            "Finalizing spectral reports...",
-            "Summoning the final judge for the ultimate decree..."
-        ]
-        full_thought_process = "\n".join(f"• {step}" for step in thinking_steps)
-        displayed_text = ""
-        base_html = '<div class="thinking-bar"><pre style="white-space: pre-wrap; word-wrap: break-word;"><code>{}</code></pre></div>'
-        
-        for char_index, char in enumerate(full_thought_process):
-            displayed_text += char
-            cursor = "▌" if char_index % 2 == 0 else " " 
-            thinking_placeholder.markdown(base_html.format(displayed_text + cursor), unsafe_allow_html=True)
-            time.sleep(0.015) 
-
-        thinking_placeholder.markdown(base_html.format(displayed_text), unsafe_allow_html=True) # Final text
-        time.sleep(0.5) # Pause after animation before clearing
-        thinking_placeholder.empty() # Clear the animation placeholder
+        base_html = '<div class="thinking-bar">{}</div>'
 
         # Now show the spinner for the actual pipeline execution
-        with st.spinner(GENIE_PERSONA_DIALOGUE['thinking']): 
+        with st.spinner(GENIE_PERSONA_DIALOGUE['thinking']):
             try:
-                final_output, intermediate_data = run_analysis_pipeline(st.session_state.product_url)
+                final_output, intermediate_data = run_analysis_pipeline(st.session_state.product_url, thinking_placeholder, base_html)
                 st.session_state.results['final_verdict_str'] = final_output
                 
                 # --- KEY CORRECTION HERE ---
