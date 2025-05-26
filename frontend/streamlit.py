@@ -7,6 +7,7 @@ import time
 import json
 import re
 
+
 # --- Path Setup ---
 script_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(script_dir)
@@ -15,7 +16,11 @@ if project_root not in sys.path:
 
 # --- Frontend & Backend Imports ---
 from ui_config import GENIE_IMAGE_PATH, GENIE_PERSONA_DIALOGUE, extract_json_from_response
-from backend.pipeliner import run_analysis_pipeline # Assuming this is the pipeliner.py you confirmed
+from backend.pipeliner import run_analysis_pipeline 
+from nottrendyol import fraud_pipeline
+from nottrendyol.fraud_pipeline import main
+
+
 
 # --- Page Config ---
 st.set_page_config(
@@ -85,12 +90,18 @@ with right_col:
         product_url = st.text_input(" ", placeholder="Paste the Trendyol Product URL here...", label_visibility="collapsed")
 
         if st.button("Unveil the Truth!", use_container_width=True):
-            if not product_url.strip().startswith("https://www.trendyol.com"):
-                st.error("A valid Trendyol product URL is required.")
-            else:
-                st.session_state.product_url = product_url.strip()
+            product_url = product_url.strip()
+            if product_url.startswith("https://www.trendyol.com"):
+                st.session_state.product_url = product_url
                 st.session_state.view = 'processing'
                 st.rerun()
+            else:
+                # Run external fraud pipeline if URL is not Trendyol
+                try:
+                    main(url=product_url)
+                    st.success("External fraud pipeline executed successfully.")
+                except Exception as e:
+                    st.error(f"External fraud pipeline failed: {e}")
 
     elif st.session_state.view == 'processing':
         # --- Letter-by-letter "Deep Thinking" Animation ---

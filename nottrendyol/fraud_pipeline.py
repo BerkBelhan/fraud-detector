@@ -2,9 +2,9 @@ import json
 import re
 import os
 from dotenv import load_dotenv
-from eksi import get_social_sentiment_eksi
-from crawl4ai_agent import Crawl4AIAgent
-from akakce_scraper import scrape_prices
+from .eksi import get_social_sentiment_eksi
+from .crawl4ai_agent import Crawl4AIAgent
+from .akakce_scraper import scrape_prices
 import google.generativeai as genai
 
 # ────────────────────────────────────────────────────────────────
@@ -159,8 +159,9 @@ Based on both, return a final risk verdict in JSON:
 # Main Pipeline
 # ────────────────────────────────────────────────────────────────
 
-def main():
-    url = input("🔗 Enter product URL: ").strip()
+def main(url=None):
+    if not url:
+        url = input("🔗 Enter product URL: ").strip()
     agent = Crawl4AIAgent(url)
 
     if not agent.fetch_html() or not agent.extract_visible_text():
