@@ -56,3 +56,4 @@ def call_gemini(prompt: str) -> dict:
     except Exception as e:
         print(f"DEBUG: An exception occurred: {e}")
         return {"error": str(e)}
+    
