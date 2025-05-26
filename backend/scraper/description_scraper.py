@@ -53,14 +53,26 @@ def format(desc):
 
     return formatted_text
 
+def link_parse(url):
+    new_url = ""
+    if url.startswith("https://"):
+        new_url += "https://"
+        url = url[8:]
+        
+    url = url.split('/')
+    for i in range(3):
+        if i == 2:
+            new_url += url[i].split('?')[0]
+        else:
+            new_url += url[i] + "/"
+    return new_url
+
 def get_description(url):
+    url = link_parse(url)
     desc = scrape_descriptions(url)
     return format(desc)
 
 
 if __name__ == "__main__":
     url = input("Enter the URL: ")
-    desc = scrape_descriptions(url)
-    formatted_desc = format(desc)
-
-    print(formatted_desc)
+    print(get_description(url))

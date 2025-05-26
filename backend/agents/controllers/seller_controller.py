@@ -1,4 +1,4 @@
-from backend.utils.gemini_utils import model
+
 
 def classify_seller_analysis(paragraph):
     """

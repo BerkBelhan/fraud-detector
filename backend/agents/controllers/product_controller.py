@@ -1,4 +1,4 @@
-from backend.utils.gemini_utils import model
+
 
 #   SCORE EKLENECEK JSON A "score": "A numerical score from 0 to 100 indicating trustworthiness."
 def classify_product_analysis(paragraph):
@@ -18,6 +18,7 @@ def classify_product_analysis(paragraph):
     {{
       "verdict": "Safe" | "Suspicious" | "Likely Scam",
       "reason": "A short, clear summary (1-2 sentences) extracted from the analysis."
+    
     }}
     
 
