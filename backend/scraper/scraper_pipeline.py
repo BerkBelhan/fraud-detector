@@ -57,7 +57,7 @@ def scrape_all_info(url, thinking_placeholder=None, base_html=None):
         thinking_placeholder.markdown(base_html.format(text), unsafe_allow_html=True)
         time.sleep(0.00003)
 
-    questions_fetch = fetch.format("questions")
+    """questions_fetch = fetch.format("questions")
     text = ""
     for char in questions_fetch:
         text += char
@@ -71,11 +71,11 @@ def scrape_all_info(url, thinking_placeholder=None, base_html=None):
     for char in base_questions:
         text += char
         thinking_placeholder.markdown(base_html.format(text), unsafe_allow_html=True)
-        time.sleep(0.00003)
+        time.sleep(0.00003)"""
 
     return {
         "description": description,
         "reviews": reviews,    
         "seller": seller_info,
-        "questions": questions
+        "questions": ""
     }
