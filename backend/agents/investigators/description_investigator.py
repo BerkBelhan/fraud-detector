@@ -1,47 +1,35 @@
-from google.genai import types
-import time
+# In: backend/agents/investigators/description_investigator.py
 
-def evaluate_product_description(description, thinking_placeholder, base_html):
-    from backend.utils.gemini_utils import client  # or however you're loading Gemini
+# 1. Import our one, reliable function for calling the API
+from backend.utils.gemini_utils import call_gemini
 
-    instruction = """
-You are an agent who analyzes product description.
-Your response will be used to determine the product is scam and whether to proceed with the purchase or not.
-There will be many agents like you and they will analyze different parts of the product such as seller informations, product reviews etc...
-Some products may return error message, in this case, you should return a message saying that there are no description to analyze.
-Try to provide valueable insights about the description.
-Do you think the description is well written? 
-Does it contain any suspicious or scam-related phrases?
-Does it provide enough information about the product?
-The language of the product description is Turkish, so you should understand Turkish.
-Your output have to be in English and it should be formal and professional.
-"""
+def evaluate_product_description(description, thinking_placeholder=None, base_html=None):
+    """
+    Analyzes the product description by calling the unified Gemini helper function.
+    """
+    # 2. Create a clear prompt for this specific agent's task, asking for a JSON output.
+    prompt = f"""
+    You are an e-commerce analysis agent. Your task is to analyze the following product description, which is in Turkish.
+    Focus on its clarity, professionalism, and any suspicious language (e.g., exaggerated claims, pressure tactics).
+    Your output MUST be a single JSON object with one key: "summary". Your summary must be in English.
 
-    investigator = "Investigating the product description"
-    text = ""
-    for char in investigator:
-        text += char
-        thinking_placeholder.markdown(base_html.format(text), unsafe_allow_html=True)
-        time.sleep(0.00003)
-    
-    response = client.models.generate_content(
-        model='gemini-2.0-flash',
-        contents=description,
-        config=types.GenerateContentConfig(
-            system_instruction=instruction,
-            temperature=0.3,
-            max_output_tokens=1000,
-            top_p=0.5,
-            top_k=5,
-            seed=42
-        ),
-    ).text
+    Example:
+    {{
+        "summary": "The product description is clear and professional, providing adequate detail about the product's features without using suspicious marketing tactics."
+    }}
 
-    base_response = response[:200]
-    text += "<br>"
-    for char in base_response:
-        text += char
-        thinking_placeholder.markdown(base_html.format(text), unsafe_allow_html=True)
-        time.sleep(0.00003)
+    --- PRODUCT DESCRIPTION DATA ---
+    {description}
+    --- END OF DATA ---
 
-    return response
+    Now, provide your analysis as a single JSON object.
+    """
+
+    # 3. Call the unified Gemini function
+    result_dict = call_gemini(prompt)
+
+    # 4. Handle the response and return ONLY the summary paragraph
+    if "error" in result_dict:
+        return f"Error during description analysis: {result_dict['error']}"
+
+    return result_dict.get("summary", "Could not generate a summary for the product description.")

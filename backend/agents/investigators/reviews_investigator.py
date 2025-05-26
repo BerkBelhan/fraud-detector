@@ -1,47 +1,35 @@
-from google.genai import types
-import time
+# In: backend/agents/investigators/reviews_investigator.py
 
-def evaluate_product_comments(comments, thinking_placeholder, base_html):
-    from backend.utils.gemini_utils import client  # or however you're loading Gemini
+# 1. Import our one, reliable function for calling the API
+from backend.utils.gemini_utils import call_gemini
 
-    instruction = """
-You are an agent who analyzes user comments and reviews about a product. 
-Your response will be used to determine the product is scam and whether to proceed with the purchase or not.
-There will be many agents like you and they will analyze different parts of the product such as seller informations, product description etc...
-Some products may have no comments at all, in this case, you should return a message saying that there are no comments to analyze.
-Provide valueable insights about the comments, for instance, give some example from fraud related comments.
-Also return good results for products that have good comments.
-You will see average rating from 1 to 5, where 1 is the worst and 5 is the best. You have to analyze this rating and give your insights about it.
-Comments will be written in Turkish, so you should understand Turkish.
-You will see comments count and reviews count. It's another metric you should analyze.
-Your output have to be in English excluding Turkish comments and it should be formal and professional.
-"""
+def evaluate_product_comments(comments, thinking_placeholder=None, base_html=None):
+    """
+    Analyzes product comments by calling the unified Gemini helper function.
+    """
+    # 2. Create a clear prompt for this specific agent's task, asking for a JSON output.
+    prompt = f"""
+    You are an e-commerce analysis agent. Your task is to analyze the following product reviews, which are in Turkish.
+    Look for patterns like fake reviews (repetitive, generic praise), significant complaints about product quality, or non-delivery.
+    Your output MUST be a single JSON object with one key: "summary". Your summary must be in English.
 
-    investigator = "Investigating the product reviews and comments"
-    text = ""
-    for char in investigator:
-        text += char
-        thinking_placeholder.markdown(base_html.format(text), unsafe_allow_html=True)
-        time.sleep(0.00003)
-    
-    response = client.models.generate_content(
-        model='gemini-2.0-flash',
-        contents=comments,
-        config=types.GenerateContentConfig(
-            system_instruction=instruction,
-            temperature=0.3,
-            max_output_tokens=1000,
-            top_p=0.5,
-            top_k=5,
-            seed=42
-        ),
-    ).text
+    Example:
+    {{
+        "summary": "Analysis of user reviews shows a high number of positive but generic comments, suggesting a potential fake review campaign. There are also several credible complaints about the item not matching the description."
+    }}
 
-    base_response = response[:200]
-    text += "<br>"
-    for char in base_response:
-        text += char
-        thinking_placeholder.markdown(base_html.format(text), unsafe_allow_html=True)
-        time.sleep(0.00003)
+    --- PRODUCT REVIEW DATA ---
+    {comments}
+    --- END OF DATA ---
 
-    return response
+    Now, provide your analysis as a single JSON object.
+    """
+
+    # 3. Call the unified Gemini function
+    result_dict = call_gemini(prompt)
+
+    # 4. Handle the response and return ONLY the summary paragraph
+    if "error" in result_dict:
+        return f"Error during review analysis: {result_dict['error']}"
+
+    return result_dict.get("summary", "Could not generate a summary for the product reviews.")

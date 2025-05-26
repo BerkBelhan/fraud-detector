@@ -1,117 +1,112 @@
-from backend.utils.gemini_utils import client
-from google.genai import types
-from pydantic import BaseModel
+# In: backend/agents/final_judge.py
+# --- FINAL CORRECTED VERSION ---
+
 import time
+from pydantic import BaseModel, ValidationError
+from typing import List # <--- CHANGE 1: Added this import
+
+# We import our single, reliable function for calling the Gemini API
+from backend.utils.gemini_utils import call_gemini
+
 
 def final_verdict_with_reasoning(product_response, seller_response, description_response, thinking_placeholder=None, base_html=None):
-    ins = """
-You are the final decision-making agent in a multi-agent fraud detection system for e-commerce products and sellers.
+    """
+    Integrates analyses from other agents, calls Gemini for a final verdict,
+    and formats the response string for display.
+    """
 
-There are two agents:
+    # --- START OF CHANGES ---
 
-- Product Description Investigator
-- Product Reviews Investigator
-- Seller Information Investigator
+    # 2. NEW: Define a Pydantic model for a single reasoning item
+    class ReasoningItem(BaseModel):
+        reason: str
 
-Your job is to:
-
-1. Integrate both analyses and provide an overall trust verdict for the product-seller.
-2. Give a trustworthy score between 0 and 100, where 0 is completely untrustworthy and 100 is completely trustworthy. Don't hesitate to give low points if you see big threats.
-3. Provide a concise explanation of your verdict, focusing on key points from both analyses.
-4. Always give examples for your reasoning, such as specific comments or seller behaviors that influenced your decision.
-
-Be as objective as possible, but also consider the overall context of the product and seller.
-Your output should be well formatted and easy to understand.
-Your output have to be in English.
-Your input will be pure English excluding Turkish comments and seller information.
-Be formal and professional in your tone.
-
-In the end, you should return a brief summary of your analysis, an overall score with review, and a list of reasonings ( at least 7 reasons ) with examples that led to your decision.
-Your overall score review should be related with agents' analyses.
-
-In addition, you have to provide a small suggestion by agents for the users who wants to buy this product.
-
-Don't mention the agents and their names in your response
-Reasonings should be sorted from the most important to the least important which represents the score accurately.
-"""
-
-    prompt = f"""
-### Product Description Investigator Analysis:
-{description_response}
-
-### Product Reviews Investigator Analysis:
-
-{product_response}
-
-### Seller Information Investigator Analysis:
-
-{seller_response}
-"""
-
+    # 3. Update the main model to expect a list of ReasoningItem objects
     class OverallResult(BaseModel):
         summary: str
         overall_score: int
         overall_score_review: str
-        reasonings_with_examples: list[str]
+        reasonings_with_examples: List[ReasoningItem] # This line was changed from list[str]
         suggestion: str
 
-    final_judge = "Final evaluations"
-    text = ""
-    for char in final_judge:
-        text += char
-        thinking_placeholder.markdown(base_html.format(text), unsafe_allow_html=True)
+    # --- END OF CHANGES ---
 
-    response = client.models.generate_content(
-        model='gemini-2.0-flash',
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            system_instruction=ins,
-            temperature=0.1,
-            max_output_tokens=2000,
-            top_p=0.8,
-            top_k=3,
-            seed=42,
-            responseSchema=OverallResult,
-            responseMimeType='application/json'
-        ),
-    )
+    prompt = f"""
+You are the final decision-making agent in a multi-agent fraud detection system.
+Your job is to integrate the following analyses, provide an overall trust verdict, a score from 0-100,
+and a detailed explanation with examples. Your response must be in English.
 
-    response: OverallResult = response.parsed
+Your output MUST be a single JSON object that strictly adheres to this schema:
+{{
+    "summary": "A brief summary of your analysis.",
+    "overall_score": "An integer score between 0 and 100.",
+    "overall_score_review": "A short review explaining the score.",
+    "reasonings_with_examples": [
+        {{"reason": "Reasoning point with an example."}},
+        {{"reason": "Another reasoning point with an example."}}
+    ],
+    "suggestion": "A small suggestion for users who want to buy this product."
+}}
 
-    base_summary = response.summary[:200]
-    text += "<br>"
-    for char in base_summary:
-        text += char
-        thinking_placeholder.markdown(base_html.format(text), unsafe_allow_html=True)
-        time.sleep(0.00003)
+--- START OF DATA FOR ANALYSIS ---
 
-    reasonings = response.reasonings_with_examples
-    reasonings_text = ""
-    for i in range(len(reasonings)):
-        reasonings_text += f"**{i + 1}.** {reasonings[i]}\n\n"
+### Product Description Investigator Analysis:
+{description_response}
 
-    formatted_text = f"""
+### Product Reviews Investigator Analysis:
+{product_response}
 
+### Seller Information Investigator Analysis:
+{seller_response}
+
+--- END OF DATA FOR ANALYSIS ---
+
+Now, provide your final verdict as a single, clean JSON object with no other text before or after it.
+"""
+
+    if thinking_placeholder and base_html:
+        final_judge_text = "Finalizing verdict..."
+        animated_text = ""
+        for char in final_judge_text:
+            animated_text += char
+            thinking_placeholder.markdown(base_html.format(animated_text), unsafe_allow_html=True)
+            time.sleep(0.05)
+
+    result_json = call_gemini(prompt)
+
+    if "error" in result_json:
+        return f"An error occurred during final analysis: {result_json['error']}"
+
+    try:
+        response = OverallResult(**result_json)
+
+        # --- START OF CHANGES ---
+
+        # 4. Update the formatting loop to access the .reason attribute from each item
+        reasonings_text = ""
+        for i, item in enumerate(response.reasonings_with_examples):
+            reasonings_text += f"**{i + 1}.** {item.reason}\n\n" # Changed from `reason` to `item.reason`
+
+        # --- END OF CHANGES ---
+
+        formatted_text = f"""
 ### Summary of Analysis
-
 {response.summary}
 
 ### Overall Trustworthy Score: {response.overall_score}/100
 
 ### Overall Score Review
-
 {response.overall_score_review}
 
 ### Reasonings
-
 {reasonings_text}
 
 ### Additional Suggestions for Users
-
 {response.suggestion}
-
 """
+        return formatted_text
 
-    return formatted_text
-
-
+    except ValidationError as e:
+        return f"Error: The AI response was not in the expected format.\n\nDetails: {e}\n\nRaw AI Response: {result_json}"
+    except Exception as e:
+        return f"An unexpected error occurred while processing the final verdict: {e}"
