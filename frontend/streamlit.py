@@ -16,7 +16,7 @@ if project_root not in sys.path:
 
 # --- Frontend & Backend Imports ---
 from ui_config import GENIE_IMAGE_PATH, GENIE_PERSONA_DIALOGUE, extract_json_from_response
-from backend.pipeliner import run_analysis_pipeline 
+from backend.pipeliner import run_analysis_pipeline
 from nottrendyol import fraud_pipeline
 from nottrendyol.fraud_pipeline import main
 
@@ -55,6 +55,16 @@ def display_finding(icon, title, feedback_dict):
         f'  <p class="reason">{reason}</p>'
         f'</div>', unsafe_allow_html=True)
 
+def display_summary_finding(icon, title, summary_text):
+    """
+    Displays investigator summaries in a styled box.
+    """
+    st.markdown(
+        f'<div class="finding-box unknown">' # Using 'unknown' class for neutral gold styling
+        f'  <p class="finding-title">{icon} {title}</p>'
+        f'  <p class="reason">{summary_text}</p>'
+        f'</div>', unsafe_allow_html=True)
+
 def display_final_verdict(final_verdict_str):
 
 
@@ -91,35 +101,31 @@ with right_col:
 
         if st.button("Unveil the Truth!", use_container_width=True):
             product_url = product_url.strip()
-            if product_url.startswith("https://www.trendyol.com"):
+            
+            # --- THIS IS THE CORRECTED URL CHECK ---
+            if "trendyol.com/" in product_url:
+            # --- END OF CORRECTION ---
+                
                 st.session_state.product_url = product_url
                 st.session_state.view = 'processing'
                 st.rerun()
             else:
                 # Run external fraud pipeline if URL is not Trendyol
                 try:
-                    main(url=product_url)
+                    with st.spinner("Running external analysis... Check console for results."):
+                        main(url=product_url)
                     st.success("External fraud pipeline executed successfully.")
                 except Exception as e:
                     st.error(f"External fraud pipeline failed: {e}")
 
     elif st.session_state.view == 'processing':
-        # --- Letter-by-letter "Deep Thinking" Animation ---
         thinking_placeholder = st.empty()
         base_html = '<div class="thinking-bar">{}</div>'
 
-        # Now show the spinner for the actual pipeline execution
         with st.spinner(GENIE_PERSONA_DIALOGUE['thinking']):
             try:
                 final_output, intermediate_data = run_analysis_pipeline(st.session_state.product_url, thinking_placeholder, base_html)
                 st.session_state.results['final_verdict_str'] = final_output
-                
-                # --- KEY CORRECTION HERE ---
-                # Using keys that match your confirmed pipeliner.py output
-                st.session_state.results['product_json'] = extract_json_from_response(intermediate_data.get("Product Analysis JSON", {}))
-                st.session_state.results['seller_json'] = extract_json_from_response(intermediate_data.get("Seller Analysis JSON", {}))
-                # --- END KEY CORRECTION ---
-
                 st.session_state.results['raw_data'] = intermediate_data
                 st.session_state.view = 'results'
                 st.rerun()
@@ -134,9 +140,14 @@ with right_col:
 
         with st.expander("Show Detailed Investigator Findings & Raw Data"):
             st.markdown("---")
-            st.subheader("Intermediate Controller Findings")
-            display_finding("Product", "Product Review Analysis", st.session_state.results['product_json'])
-            display_finding("Seller", "Seller Review Analysis", st.session_state.results['seller_json'])
+            st.subheader("Investigator Summaries")
+
+            raw_data = st.session_state.results.get('raw_data', {})
+
+            display_summary_finding("📝", "Description Analysis", raw_data.get("Description Info", "Analysis not available."))
+            display_summary_finding("💬", "Product Review Analysis", raw_data.get("Product Paragraph", "Analysis not available."))
+            display_summary_finding("📦", "Seller Information Analysis", raw_data.get("Seller Paragraph", "Analysis not available."))
+
             st.markdown("---")
-            st.subheader("Raw Data Collected by Scrapers")
-            st.json(st.session_state.results['raw_data'])
+            st.subheader("Raw Scraper Data")
+            st.json(st.session_state.results.get('raw_data', {}))
