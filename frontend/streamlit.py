@@ -3,7 +3,7 @@
 import sys
 import os
 import streamlit as st
-import time # Keep time if other parts of your original streamlit file used it.
+import time
 # import json # No longer needed directly here if all parsing is in backend
 # import re   # No longer needed directly here
 
@@ -15,9 +15,7 @@ if project_root not in sys.path:
 
 # --- Frontend & Backend Imports ---
 from ui_config import GENIE_IMAGE_PATH, GENIE_PERSONA_DIALOGUE
-# Removed extract_json_from_response as nottrendyol handles its own JSON now
 from backend.pipeliner import run_analysis_pipeline
-# Import the main function correctly
 from nottrendyol.fraud_pipeline import main as nottrendyol_main_pipeline
 
 
@@ -36,13 +34,16 @@ def load_external_css(css_file_path):
     except FileNotFoundError:
         st.error(f"CSS file not found at {css_file_path}")
 
+# --- MODIFIED FUNCTION ---
 def display_finding(icon, title, feedback_dict):
-    # This function expects "verdict", "reason", "score"
-    # We will adapt the nottrendyol data to fit this if possible
-    # For nottrendyol, 'level' maps to 'verdict'
     verdict = feedback_dict.get("level", feedback_dict.get("verdict", "Unknown"))
     reason = feedback_dict.get("reason", "No reasoning was provided.")
-    score = feedback_dict.get("score", "N/A") # nottrendyol doesn't provide a score for these intermediate steps
+    score = feedback_dict.get("score", "N/A")
+
+    # Conditionally create the score display string
+    score_display_text = ""
+    if score != "N/A":
+        score_display_text = f" (Score: {score})"
 
     verdict_lower = str(verdict).lower()
     if "safe" in verdict_lower: verdict_class = "safe"
@@ -53,15 +54,21 @@ def display_finding(icon, title, feedback_dict):
     st.markdown(
         f'<div class="finding-box {verdict_class}">'
         f'  <p class="finding-title">{icon} {title}</p>'
-        f'  <p class="verdict {verdict_class}">{verdict} (Score: {score})</p>'
+        f'  <p class="verdict {verdict_class}">{verdict}{score_display_text}</p>' # Use the conditional score string
         f'  <p class="reason">{reason}</p>'
         f'</div>', unsafe_allow_html=True)
+# --- END OF MODIFIED FUNCTION ---
 
 def display_summary_finding(icon, title, summary_text):
+    """
+    Displays investigator summaries in a styled box.
+    Replaces newline characters with <br> for better readability.
+    """
+    formatted_summary_text = str(summary_text).replace("\n", "<br>")
     st.markdown(
         f'<div class="finding-box unknown">'
         f'  <p class="finding-title">{icon} {title}</p>'
-        f'  <p class="reason">{summary_text}</p>'
+        f'  <p class="reason">{formatted_summary_text}</p>'
         f'</div>', unsafe_allow_html=True)
 
 def display_final_verdict(final_verdict_content, is_external_pipeline=False):
@@ -70,7 +77,6 @@ def display_final_verdict(final_verdict_content, is_external_pipeline=False):
     verdict_class_override = None
 
     if is_external_pipeline:
-        # For the external pipeline, final_verdict_content is a dictionary
         level = final_verdict_content.get("final_level", "Error")
         reason = final_verdict_content.get("summary_reason", "Analysis failed.")
         text_to_display = f"{level} - {reason}"
@@ -80,19 +86,15 @@ def display_final_verdict(final_verdict_content, is_external_pipeline=False):
         elif "suspicious" in level_lower: verdict_class_override = "suspicious"
         elif "scam" in level_lower or "error" in level_lower: verdict_class_override = "scam"
         else: verdict_class_override = "unknown"
-
     else:
-        # For the internal pipeline, it's a pre-formatted string
         text_to_display = final_verdict_content
-
 
     html_class = f"final-verdict-box {verdict_class_override if verdict_class_override else ''}"
     st.markdown(
-        f'<div class="{html_class.strip()}">' # Apply color class if available
+        f'<div class="{html_class.strip()}">'
         f'  <p class="final-verdict-title">{title}</p>'
         f'  <p class="final-verdict-text">{text_to_display}</p>'
         f'</div>', unsafe_allow_html=True)
-
 
 # --- Main App Logic ---
 if 'view' not in st.session_state:
@@ -107,7 +109,7 @@ left_col, right_col = st.columns([1, 1.5], gap="large")
 
 with left_col:
     st.image(GENIE_IMAGE_PATH, use_container_width=True)
-    if st.session_state.view in ['results', 'nottrendyol_results']: # Unified button logic
+    if st.session_state.view in ['results', 'nottrendyol_results']:
         if st.button("Analyze Another Product", use_container_width=True):
             st.session_state.view = 'input'
             st.session_state.results = {}
@@ -122,11 +124,11 @@ with right_col:
             product_url = product_url.strip()
             if "trendyol.com/" in product_url:
                 st.session_state.product_url = product_url
-                st.session_state.view = 'processing_trendyol' # Specific view for trendyol
+                st.session_state.view = 'processing_trendyol'
                 st.rerun()
             else:
-                st.session_state.product_url = product_url # Store URL for external
-                st.session_state.view = 'processing_external' # Specific view for external
+                st.session_state.product_url = product_url
+                st.session_state.view = 'processing_external'
                 st.rerun()
 
     elif st.session_state.view == 'processing_trendyol':
@@ -147,17 +149,16 @@ with right_col:
     elif st.session_state.view == 'processing_external':
         with st.spinner("Running external analysis... This might take a moment."):
             try:
-                # Call the modified nottrendyol_main_pipeline and store its dict output
                 nottrendyol_results_data = nottrendyol_main_pipeline(url=st.session_state.product_url)
                 st.session_state.results['nottrendyol_data'] = nottrendyol_results_data
-                st.session_state.view = 'nottrendyol_results' # New view for external results
+                st.session_state.view = 'nottrendyol_results'
                 st.rerun()
             except Exception as e:
                 st.error(f"External fraud pipeline failed: {e}")
                 st.session_state.view = 'input'
                 st.rerun()
 
-    elif st.session_state.view == 'results': # For Trendyol pipeline results
+    elif st.session_state.view == 'results':
         st.markdown(f"<p class='genie-speech'>{GENIE_PERSONA_DIALOGUE['final_verdict']}</p>", unsafe_allow_html=True)
         display_final_verdict(st.session_state.results['final_verdict_str'])
 
@@ -172,11 +173,10 @@ with right_col:
             st.subheader("Raw Scraper Data")
             st.json(st.session_state.results.get('raw_data', {}))
 
-    elif st.session_state.view == 'nottrendyol_results': # New view for external pipeline results
+    elif st.session_state.view == 'nottrendyol_results':
         st.markdown(f"<p class='genie-speech'>{GENIE_PERSONA_DIALOGUE['final_verdict']}</p>", unsafe_allow_html=True)
         data = st.session_state.results.get('nottrendyol_data', {})
         
-        # Display the final verdict from external pipeline
         display_final_verdict(data.get("final_verdict", {"final_level": "Error", "summary_reason": "No final verdict."}), is_external_pipeline=True)
 
         with st.expander("Show Detailed Findings (External Site)"):
