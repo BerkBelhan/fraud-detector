@@ -1,22 +1,55 @@
 import json
 import re
+import os
+from dotenv import load_dotenv
 from eksi import get_social_sentiment_eksi
 from crawl4ai_agent import Crawl4AIAgent
 from akakce_scraper import scrape_prices
-import os
 import google.generativeai as genai
-from dotenv import load_dotenv
 
+# ────────────────────────────────────────────────────────────────
+# Config
+# ────────────────────────────────────────────────────────────────
 load_dotenv()
 API_KEY = os.getenv("GEMINI_API_KEY")
-
 
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel("gemini-1.5-flash")
 
+INPUT_COST_PER_M = 0.035
+OUTPUT_COST_PER_M = 0.070
+# Running total cost tracker
+total_cost_usd = 0.0
+
 # ────────────────────────────────────────────────────────────────
-# Utility Functions
+# Helper Functions
 # ────────────────────────────────────────────────────────────────
+
+def compute_cost(input_tokens, output_tokens):
+    return round(
+        (input_tokens * INPUT_COST_PER_M + output_tokens * OUTPUT_COST_PER_M) / 1_000_000,
+        6
+    )
+
+def run_gemini_agent(label, prompt):
+
+    global total_cost_usd
+    
+    response = model.generate_content(prompt)
+    usage = response.usage_metadata
+
+    input_tokens = usage.prompt_token_count
+    output_tokens = usage.candidates_token_count
+    cost = compute_cost(input_tokens, output_tokens)
+
+    total_cost_usd += cost
+
+    print(f"🧾 Gemini Agent: {label}")
+    print(f"   - Input Tokens: {input_tokens}")
+    print(f"   - Output Tokens: {output_tokens}")
+    print(f"   - Total Cost: ${cost:.6f}\n")
+
+    return response.text
 
 def extract_json_from_gemini_response(text):
     match = re.search(r"\{.*\}", text, re.DOTALL)
@@ -32,7 +65,7 @@ def extract_json_from_gemini_response(text):
         return None
 
 # ────────────────────────────────────────────────────────────────
-# Individual Agents
+# Gemini Agent Wrappers
 # ────────────────────────────────────────────────────────────────
 
 def evaluate_with_comments(comments):
@@ -55,8 +88,8 @@ Respond in this format:
 User comments:
 \"\"\"{joined}\"\"\"
 """
-    response = model.generate_content(prompt)
-    return extract_json_from_gemini_response(response.text)
+    text = run_gemini_agent("evaluate_with_comments", prompt)
+    return extract_json_from_gemini_response(text)
 
 def evaluate_with_price_gap(product_price, akakce_prices):
     prompt = f"""
@@ -71,8 +104,6 @@ Compare this product's price with similar listings. You're checking for suspicio
   - The seller has no reliable reputation.
 - Focus on **unreasonably low prices**, not just high ones.
 
-
-
 Product price: {product_price}
 
 Other prices:
@@ -84,8 +115,8 @@ Return a JSON verdict like:
   "reason": "..."
 }}
 """
-    response = model.generate_content(prompt)
-    return extract_json_from_gemini_response(response.text)
+    text = run_gemini_agent("evaluate_with_price_gap", prompt)
+    return extract_json_from_gemini_response(text)
 
 def combine_verdicts(comment_verdict, price_verdict):
     prompt = f"""
@@ -109,7 +140,6 @@ Respond in JSON:
   "summary_reason": "..."
 }}
 
-
 1. User Comment Verdict:
 {json.dumps(comment_verdict, indent=2, ensure_ascii=False)}
 
@@ -122,8 +152,8 @@ Based on both, return a final risk verdict in JSON:
   "summary_reason": "..."
 }}
 """
-    response = model.generate_content(prompt)
-    return extract_json_from_gemini_response(response.text)
+    text = run_gemini_agent("combine_verdicts", prompt)
+    return extract_json_from_gemini_response(text)
 
 # ────────────────────────────────────────────────────────────────
 # Main Pipeline
@@ -173,6 +203,7 @@ def main():
     final_verdict = combine_verdicts(comment_verdict, price_verdict)
 
     print("\n📣 Final Scam Verdict:\n", json.dumps(final_verdict, indent=2, ensure_ascii=False))
+    print(f"\n💸 Total Gemini API Cost for this run: ${total_cost_usd:.6f}")
 
 if __name__ == "__main__":
     main()
