@@ -1,48 +1,41 @@
+# C:/SENG472/MainProje/fraud-detector/frontend/ui_config.py
 import re
 import json
 
+# Path to the genie/scaminator image asset
 GENIE_IMAGE_PATH = "frontend/assets/genie.png" 
 
+# Dialogue lines for the Scaminator persona
 GENIE_PERSONA_DIALOGUE = {
-    "welcome": "Greetings, Master. I am the Scaminator. Present me a product URL, and I shall consult the spirits of Product and Seller for you.",
-    "thinking": "The mists of the marketplace swirl... I am analyzing the separate spirits...",
-    "done_no_verdict": "I have returned with my findings from the two realms. Examine them carefully."
+    "welcome": "Greetings, Master. I am the Scaminator. Present me a product URL, and I shall unveil its secrets.",
+    "thinking": "The mists of the marketplace swirl... I am consulting the digital spirits...",
+    "final_verdict": "I have returned. The threads of data have been woven into a final judgment."
 }
 
 def extract_json_from_response(text_response):
     """
-    Finds and parses a JSON block from a string, even if it's surrounded by other text.
+    Finds and parses a JSON block from a string, handling various formats.
     """
-    if not isinstance(text_response, str): 
-        return text_response # Already a dict, or not a string
+    # If it's already a dictionary, return it directly.
+    if isinstance(text_response, dict):
+        return text_response
+    
+    # Ensure the input is a string before proceeding
+    if not isinstance(text_response, str):
+        return {"verdict": "Error", "reason": "Invalid data type for JSON extraction.", "score": 0}
 
-    # Try to find JSON within ```json ... ```
+    # First, try to find a Markdown JSON block
     match = re.search(r"```json\s*(\{.*?\})\s*```", text_response, re.DOTALL)
     if match:
         json_string = match.group(1)
         try:
             return json.loads(json_string)
         except json.JSONDecodeError:
-            # If parsing this specific block fails, it's a problem with this block
-            return {"error": "Malformed JSON block found within ```json ```.", "raw_text": json_string}
+            return {"verdict": "Error", "reason": "Malformed JSON found inside code block.", "score": 0}
 
-    # Fallback: if no ```json``` block, try to parse the whole string or find first/last braces
-    # This is less reliable but can catch cases where the agent doesn't use backticks
+    # If no Markdown block, try parsing the whole string as JSON
     try:
-        # Attempt to parse the whole string if it looks like JSON
-        if text_response.strip().startswith("{") and text_response.strip().endswith("}"):
-            return json.loads(text_response)
+        return json.loads(text_response)
     except json.JSONDecodeError:
-        pass # Continue to next fallback
-
-    try: # Fallback to find first '{' and last '}'
-        start = text_response.find('{')
-        end = text_response.rfind('}') + 1
-        if start != -1 and end != 0 and start < end : # Ensure valid slice
-            potential_json = text_response[start:end]
-            return json.loads(potential_json)
-    except json.JSONDecodeError:
-        pass # Ignore if this fails too
-
-    # If all else fails, return an error object with the raw text
-    return {"error": "Could not find or parse a valid JSON object in the agent's response.", "raw_response": text_response}
+        # If all parsing fails, return a structured error
+        return {"verdict": "Error", "reason": "Could not parse JSON from the agent's raw text response.", "score": 0}
