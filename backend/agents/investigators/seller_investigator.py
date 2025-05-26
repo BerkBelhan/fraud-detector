@@ -1,24 +1,29 @@
-from backend.utils.gemini_utils import model
+from google.genai import types
 
-def evaluate_seller_comments(comments):
-    """
-    Evaluates seller comments to determine trustworthiness.
-    Args:
-        comments (list): List of seller review comments.
-    Returns:
-        str: A concise evaluation paragraph summarizing trustworthiness, delivery issues, scams, and patterns in complaints.   
-    """
-    joined_comments = "\n".join(comments)
-    prompt = f"""
-    Analyze the following user comments about a seller. Focus on trustworthiness, delivery issues, scams, and patterns in complaints. Do **not** return a JSON. Instead, write a concise and clear paragraph summarizing your evaluation.
+def evaluate_seller_info(info):
+    from backend.utils.gemini_utils import client  # or however you're loading Gemini
 
-    Be honest, but cautious. If the comments seem mostly harmless (e.g., wrong color or minor delays), say that it's likely a good seller but minor mistakes occurred.
-
-    Include a suggestion for the user: whether to proceed, proceed with caution, or avoid.
-    ---
-    Seller reviews:
-    {joined_comments}
-    """
-    response = model.generate_content(prompt)
+    instruction = """
+You are an agent who analyzes seller informations for a product. 
+Your response will be used to determine the product is scam and whether to proceed with the purchase or not.
+There will be many agents like you and they will analyze different parts of the product such as product comments, product description etc...
+If the input is an error message, you should return a message saying that there is no seller information to analyze.
+Try to provide valueable insights about the seller informations.
+Try to provide bad parts and good parts of the seller informations.
+The language of the seller information is Turkish, so you should understand Turkish.
+"""
+    
+    response = client.models.generate_content(
+        model='gemini-2.0-flash',
+        contents=info,
+        config=types.GenerateContentConfig(
+            system_instruction=instruction,
+            temperature=0.3,
+            max_output_tokens=1000,
+            top_p=0.5,
+            top_k=5,
+            seed=42
+        ),
+    )
     return response.text
 

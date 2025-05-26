@@ -80,7 +80,7 @@ def format_reviews(reviews):
     formatted_text = ""
     for index, review in enumerate(reviews):
         if index == 0:
-            formatted_text += f"Rating: {review[0]}, Değerlendirme sayısı: {review[1]}, Yorum sayısı: {review[2]}\n\nYorumlar:\n"
+            formatted_text += f"Ürün Ratingi: {review[0]}, Değerlendirme sayısı: {review[1]}, Yorum sayısı: {review[2]}\n\nYorumlar:\n"
             continue
         formatted_text += f"{index}. {review}\n"
     

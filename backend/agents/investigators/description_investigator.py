@@ -1,0 +1,30 @@
+from google.genai import types
+
+def evaluate_product_description(description):
+    from backend.utils.gemini_utils import client  # or however you're loading Gemini
+
+    instruction = """
+You are an agent who analyzes product description.
+Your response will be used to determine the product is scam and whether to proceed with the purchase or not.
+There will be many agents like you and they will analyze different parts of the product such as seller informations, product reviews etc...
+Some products may return error message, in this case, you should return a message saying that there are no description to analyze.
+Try to provide valueable insights about the description.
+Do you think the description is well written? 
+Does it contain any suspicious or scam-related phrases?
+Does it provide enough information about the product?
+The language of the product description is Turkish, so you should understand Turkish.
+"""
+    
+    response = client.models.generate_content(
+        model='gemini-2.0-flash',
+        contents=description,
+        config=types.GenerateContentConfig(
+            system_instruction=instruction,
+            temperature=0.3,
+            max_output_tokens=1000,
+            top_p=0.5,
+            top_k=5,
+            seed=42
+        ),
+    )
+    return response.text

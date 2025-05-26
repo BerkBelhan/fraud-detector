@@ -10,7 +10,7 @@ st.sidebar.title("🛡️ E-Commerce Fraud Detector")
 page = st.sidebar.radio("Menu", ["Home", "Run Analysis", "About"])
 
 def show_final_verdict(final_output):
-    annotated_text(final_output)
+    #annotated_text(final_output)
     st.markdown(final_output)
 
 
