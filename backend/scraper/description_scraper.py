@@ -41,15 +41,22 @@ def format(desc):
         return "Ürün açıklaması bulunamadı, site değişmiş olabilir."
 
     description, tech_specs = desc
-    formatted_text = "Ürün Bilgilendirmesi:\n\n"
+    formatted_text = ""
+    bilgilendirme = ""
+    passed = False
+    if len(description.items()) > 5:
+        for i, item in description.items()[5:]:
+            bilgilendirme += f"{i}. {item}\n"
 
-    for i, item in description.items():
-        formatted_text += f"{i}. {item}\n"
+    if bilgilendirme != "":
+        formatted_text += "Ürün Bilgilendirmesi:\n\n"+ bilgilendirme
 
     formatted_text += "\nTeknik Özellikler:\n\n"
 
     for key, value in tech_specs.items():
         formatted_text += f"{key}: {value}\n"
+
+    print(formatted_text)
 
     return formatted_text
 

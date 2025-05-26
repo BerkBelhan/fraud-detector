@@ -9,9 +9,9 @@ from backend.agents.controllers.seller_controller import classify_seller_analysi
 from backend.agents.final_judge import final_verdict_with_reasoning
 
 
-def run_analysis_pipeline(product_url):
+def run_analysis_pipeline(product_url, thinking_placeholder, base_html):
     # Step 1: Scrape all data
-    all_data = scrape_all_info(product_url)
+    all_data = scrape_all_info(product_url, thinking_placeholder, base_html)
 
     product_comments = all_data["reviews"]
     seller_info = all_data["seller"]
@@ -19,9 +19,9 @@ def run_analysis_pipeline(product_url):
     description = all_data["description"]
 
     # Step 2: Investigators (pass directly to the functions)
-    product_paragraph = evaluate_product_comments(product_comments)
-    seller_paragraph = evaluate_seller_info(seller_info)
-    description_paragraph = evaluate_product_description(description)
+    description_paragraph = evaluate_product_description(description, thinking_placeholder, base_html)
+    product_paragraph = evaluate_product_comments(product_comments, thinking_placeholder, base_html)
+    seller_paragraph = evaluate_seller_info(seller_info, thinking_placeholder, base_html)
 
 
     # Step 3: Controllers
@@ -29,7 +29,7 @@ def run_analysis_pipeline(product_url):
     #seller_json = classify_seller_analysis(seller_paragraph)
 
     # Step 4: Final Judge
-    final_output = final_verdict_with_reasoning(product_paragraph, seller_paragraph, description_paragraph)
+    final_output = final_verdict_with_reasoning(product_paragraph, seller_paragraph, description_paragraph, thinking_placeholder, base_html)
 
     # Return final output and a dictionary of all intermediate steps for debugging
     return final_output, {

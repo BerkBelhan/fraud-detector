@@ -1,6 +1,7 @@
 from google.genai import types
+import time
 
-def evaluate_seller_info(info):
+def evaluate_seller_info(info, thinking_placeholder, base_html):
     from backend.utils.gemini_utils import client  # or however you're loading Gemini
 
     instruction = """
@@ -11,7 +12,15 @@ If the input is an error message, you should return a message saying that there 
 Try to provide valueable insights about the seller informations.
 Try to provide bad parts and good parts of the seller informations.
 The language of the seller information is Turkish, so you should understand Turkish.
+Your output have to be in English excluding Turkish seller information and it should be formal and professional.
 """
+
+    investigator = "Investigating the seller information"
+    text = ""
+    for char in investigator:
+        text += char
+        thinking_placeholder.markdown(base_html.format(text), unsafe_allow_html=True)
+        time.sleep(0.00003)
     
     response = client.models.generate_content(
         model='gemini-2.0-flash',
@@ -24,6 +33,14 @@ The language of the seller information is Turkish, so you should understand Turk
             top_k=5,
             seed=42
         ),
-    )
-    return response.text
+    ).text
+
+    base_response = response[:200]
+    text += "<br>"
+    for char in base_response:
+        text += char
+        thinking_placeholder.markdown(base_html.format(text), unsafe_allow_html=True)
+        time.sleep(0.00003)
+
+    return response
 

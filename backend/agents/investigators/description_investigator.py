@@ -1,6 +1,7 @@
 from google.genai import types
+import time
 
-def evaluate_product_description(description):
+def evaluate_product_description(description, thinking_placeholder, base_html):
     from backend.utils.gemini_utils import client  # or however you're loading Gemini
 
     instruction = """
@@ -13,7 +14,15 @@ Do you think the description is well written?
 Does it contain any suspicious or scam-related phrases?
 Does it provide enough information about the product?
 The language of the product description is Turkish, so you should understand Turkish.
+Your output have to be in English and it should be formal and professional.
 """
+
+    investigator = "Investigating the product description"
+    text = ""
+    for char in investigator:
+        text += char
+        thinking_placeholder.markdown(base_html.format(text), unsafe_allow_html=True)
+        time.sleep(0.00003)
     
     response = client.models.generate_content(
         model='gemini-2.0-flash',
@@ -26,5 +35,13 @@ The language of the product description is Turkish, so you should understand Tur
             top_k=5,
             seed=42
         ),
-    )
-    return response.text
+    ).text
+
+    base_response = response[:200]
+    text += "<br>"
+    for char in base_response:
+        text += char
+        thinking_placeholder.markdown(base_html.format(text), unsafe_allow_html=True)
+        time.sleep(0.00003)
+
+    return response
