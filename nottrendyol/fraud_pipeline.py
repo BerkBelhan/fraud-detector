@@ -3,10 +3,15 @@ import re
 from eksi import get_social_sentiment_eksi
 from crawl4ai_agent import Crawl4AIAgent
 from akakce_scraper import scrape_prices
+import os
 import google.generativeai as genai
+from dotenv import load_dotenv
 
-# 🔑 Configure Gemini
-genai.configure(api_key="AIzaSyBhgRmGe6snRZgmhM0VD_DQFZwaxPOoFSE")
+load_dotenv()
+API_KEY = os.getenv("GEMINI_API_KEY")
+
+
+genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel("gemini-1.5-flash")
 
 # ────────────────────────────────────────────────────────────────

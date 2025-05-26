@@ -2,10 +2,15 @@ import requests
 import google.generativeai as genai
 from bs4 import BeautifulSoup
 import json
+import os
+from dotenv import load_dotenv
 
-# Paste your Gemini API key directly
-GEMINI_API_KEY = "AIzaSyBhgRmGe6snRZgmhM0VD_DQFZwaxPOoFSE"
-genai.configure(api_key=GEMINI_API_KEY)
+load_dotenv()
+API_KEY = os.getenv("GEMINI_API_KEY")
+
+genai.configure(api_key=API_KEY)
+
+
 
 
 class Crawl4AIAgent:
