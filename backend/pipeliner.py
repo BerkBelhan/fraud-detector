@@ -8,12 +8,10 @@ from backend.agents.controllers.product_controller import classify_product_analy
 from backend.agents.controllers.seller_controller import classify_seller_analysis
 from backend.agents.final_judge import final_verdict_with_reasoning
 
-# Instantiate the powerful investigator once
-product_agent = ProductReviewInvestigator()
 
 def run_analysis_pipeline(product_url):
     # Step 1: Scrape all data
-    scraped_data = scrape_all_info(product_url)
+    all_data = scrape_all_info(product_url)
 
     product_comments = all_data["reviews"]
     seller_info = all_data["seller"]
