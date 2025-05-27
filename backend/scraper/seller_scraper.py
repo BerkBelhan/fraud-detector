@@ -93,7 +93,7 @@ def format_seller_info(seller_info):
     if seller_info == 0:
         return "Linke erişilemiyor"
     if seller_info == 1:
-        return "Satıcı bilgileri bulunamadı, site değişmiş olabilir."
+        return "Satıcı çok yeni bir satıcı şu an anlamlı bir verisi yok."
     
     formatted_text = "Satıcı Bilgileri:\n\n"
     for key, value in seller_info.items():
