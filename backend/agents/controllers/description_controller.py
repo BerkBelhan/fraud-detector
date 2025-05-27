@@ -2,20 +2,20 @@ from google.genai import types
 import time
 from pydantic import BaseModel
 
-def evaluate_seller_analysis(content, thinking_placeholder, base_html, top_k=50, top_p=0.95, temperature=0.3):
+def evaluate_description_analysis(content, thinking_placeholder, base_html, top_k=50, top_p=0.95, temperature=0.3):
 
     from backend.utils.gemini_utils import client  # or however you're loading Gemini
 
     ins = """
 ## Task
 
-You are an agent who controls a product seller information analysis is correctly written or not.
+You are an agent who controls a product description analysis is correctly written or not.
 Your decision will change the parameters of the analysis agent. 
 If the analysis is not correctly written, the agent will be asked to rewrite it and you will decide topK, topP and temperature parameters of the agent.
 
 ## Input
 
-You will get a product seller information, an analysis of the seller information written in both Turkish and English and the current agent parameters.
+You will get a product description, an analysis of the description written in both Turkish and English and the current agent parameters.
 
 ## Output
 
@@ -23,14 +23,14 @@ You will return a boolean value indicating whether the analysis is correctly wri
 If the analysis is not correctly written, you will return topK, topP and temperature parameters of the agent.
 """
 
-    investigator = "Controlling the seller information analysis agent"
+    investigator = "Controlling the description analysis agent"
     text = ""
     for char in investigator:
         text += char
         thinking_placeholder.markdown(base_html.format(text), unsafe_allow_html=True)
         time.sleep(0.00003)
 
-    class SellerController(BaseModel):
+    class DescriptionController(BaseModel):
         is_correct: bool
         top_k: int
         top_p: float
@@ -56,12 +56,12 @@ Temperature: {temperature}
             top_p=0.95,
             top_k=50,
             seed=42,
-            responseSchema=SellerController,
+            responseSchema=DescriptionController,
             responseMimeType='application/json'
         ),
     )
     
-    response: SellerController = response.parsed
+    response: DescriptionController = response.parsed
 
     is_correct = response.is_correct
     if is_correct:

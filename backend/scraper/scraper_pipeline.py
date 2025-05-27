@@ -18,7 +18,7 @@ def scrape_all_info(url, thinking_placeholder=None, base_html=None):
         time.sleep(0.00003)
     description = get_description(url)
 
-    base_desc = description[:200]
+    base_desc = description[:300]
     text += "<br>"
     for char in base_desc:
         text += char
@@ -33,7 +33,7 @@ def scrape_all_info(url, thinking_placeholder=None, base_html=None):
         time.sleep(0.00003)
 
     reviews = get_reviews(url)
-    base_reviews = reviews[:200]
+    base_reviews = reviews[:300]
 
     text += "<br>"
     for char in base_reviews:
@@ -49,7 +49,7 @@ def scrape_all_info(url, thinking_placeholder=None, base_html=None):
         time.sleep(0.00003)
 
     seller_info = get_seller_info(url)
-    base_seller_info = seller_info[:200]
+    base_seller_info = seller_info[:300]
 
     text += "<br>"
     for char in base_seller_info:
@@ -65,7 +65,7 @@ def scrape_all_info(url, thinking_placeholder=None, base_html=None):
         time.sleep(0.00003)
     
     questions = get_questions(url)
-    base_questions = questions[:200]
+    base_questions = questions[:300]
     
     text += "<br>"
     for char in base_questions:
@@ -76,6 +76,5 @@ def scrape_all_info(url, thinking_placeholder=None, base_html=None):
     return {
         "description": description,
         "reviews": reviews,    
-        "seller": seller_info,
-        "questions": ""
+        "seller": seller_info
     }

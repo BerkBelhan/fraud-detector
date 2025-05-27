@@ -1,7 +1,7 @@
 from google.genai import types
 import time
 
-def evaluate_product_comments(comments, thinking_placeholder, base_html):
+def evaluate_product_comments(comments, thinking_placeholder, base_html, top_k=50, top_p=0.95, temperature=0.3):
     from backend.utils.gemini_utils import client  # or however you're loading Gemini
 
     instruction = """
@@ -26,7 +26,15 @@ Comments will be written in Turkish, so you should understand Turkish.
 ## Output Format
 
 Some products may have no comments at all, in this case, you should return a message saying that there are no comments to analyze.
-Your output have to be in English excluding Turkish comments and it should be formal and professional.
+Your output have to be in English and formal.
+Your output have to be less then 400 words
+
+## Example Structure
+
+**Brief Summary**
+**Analysis of reviews and comments count and average rating**
+**Analysis of comments**
+**Some good and bad comments as examples**
 """
 
     investigator = "Investigating the product reviews and comments"
@@ -41,15 +49,15 @@ Your output have to be in English excluding Turkish comments and it should be fo
         contents=comments,
         config=types.GenerateContentConfig(
             system_instruction=instruction,
-            temperature=0.3,
-            max_output_tokens=150,
-            top_p=0.95,
-            top_k=50,
+            temperature=temperature,
+            max_output_tokens=670,
+            top_p=top_p,
+            top_k=top_k,
             seed=42
         ),
     ).text
 
-    base_response = response[:200]
+    base_response = response[:300]
     text += "<br>"
     for char in base_response:
         text += char

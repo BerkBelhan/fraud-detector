@@ -43,9 +43,9 @@ def format(desc):
     description, tech_specs = desc
     formatted_text = ""
     bilgilendirme = ""
-    if len(description.items()) > 5:
+    if len(description.items()) > 6:
         for i, item in description.items():
-            if i <= 4:
+            if i <= 5:
                 continue
             bilgilendirme += f"{i-5}. {item}\n"
 

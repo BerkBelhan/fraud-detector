@@ -2,20 +2,21 @@ from google.genai import types
 import time
 from pydantic import BaseModel
 
-def evaluate_seller_analysis(content, thinking_placeholder, base_html, top_k=50, top_p=0.95, temperature=0.3):
+def evaluate_final_judge_analysis(content, thinking_placeholder, base_html, top_k=50, top_p=0.95, temperature=0.3):
 
     from backend.utils.gemini_utils import client  # or however you're loading Gemini
 
     ins = """
 ## Task
 
-You are an agent who controls a product seller information analysis is correctly written or not.
+You are an agent who controls an overall product and seller analysis is correctly written or not.
 Your decision will change the parameters of the analysis agent. 
 If the analysis is not correctly written, the agent will be asked to rewrite it and you will decide topK, topP and temperature parameters of the agent.
+Be careful while making your decision, because it will affect the final decision of the product.
 
 ## Input
 
-You will get a product seller information, an analysis of the seller information written in both Turkish and English and the current agent parameters.
+You will get an overall analysis of product and seller written in both Turkish and English and the current agent parameters.
 
 ## Output
 
@@ -23,14 +24,14 @@ You will return a boolean value indicating whether the analysis is correctly wri
 If the analysis is not correctly written, you will return topK, topP and temperature parameters of the agent.
 """
 
-    investigator = "Controlling the seller information analysis agent"
+    investigator = "Controlling the final judge"
     text = ""
     for char in investigator:
         text += char
         thinking_placeholder.markdown(base_html.format(text), unsafe_allow_html=True)
         time.sleep(0.00003)
 
-    class SellerController(BaseModel):
+    class FinalController(BaseModel):
         is_correct: bool
         top_k: int
         top_p: float
@@ -56,12 +57,12 @@ Temperature: {temperature}
             top_p=0.95,
             top_k=50,
             seed=42,
-            responseSchema=SellerController,
+            responseSchema=FinalController,
             responseMimeType='application/json'
         ),
     )
     
-    response: SellerController = response.parsed
+    response: FinalController = response.parsed
 
     is_correct = response.is_correct
     if is_correct:

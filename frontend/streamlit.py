@@ -136,9 +136,10 @@ with right_col:
         base_html = '<div class="thinking-bar">{}</div>'
         with st.spinner(GENIE_PERSONA_DIALOGUE['thinking']):
             try:
-                final_output, intermediate_data = run_analysis_pipeline(st.session_state.product_url, thinking_placeholder, base_html)
+                final_output, raw_data, intermediate_data = run_analysis_pipeline(st.session_state.product_url, thinking_placeholder, base_html)
                 st.session_state.results['final_verdict_str'] = final_output
-                st.session_state.results['raw_data'] = intermediate_data
+                st.session_state.results['intermediate_data'] = intermediate_data
+                st.session_state.results['raw_data'] = raw_data
                 st.session_state.view = 'results'
                 st.rerun()
             except Exception as e:
@@ -165,10 +166,10 @@ with right_col:
         with st.expander("Show Detailed Investigator Findings & Raw Data (Trendyol)"):
             st.markdown("---")
             st.subheader("Investigator Summaries")
-            raw_data = st.session_state.results.get('raw_data', {})
-            display_summary_finding("📝", "Description Analysis", raw_data.get("Description Info", "Analysis not available."))
-            display_summary_finding("💬", "Product Review Analysis", raw_data.get("Product Paragraph", "Analysis not available."))
-            display_summary_finding("📦", "Seller Information Analysis", raw_data.get("Seller Paragraph", "Analysis not available."))
+            raw_data = st.session_state.results.get('intermediate_data', {})
+            display_summary_finding("📝", "Description Analysis", raw_data.get("Description Analysis", "Analysis not available."))
+            display_summary_finding("💬", "Product Review Analysis", raw_data.get("Reviews Analysis", "Analysis not available."))
+            display_summary_finding("📦", "Seller Information Analysis", raw_data.get("Seller Analysis", "Analysis not available."))
             st.markdown("---")
             st.subheader("Raw Scraper Data")
             st.json(st.session_state.results.get('raw_data', {}))

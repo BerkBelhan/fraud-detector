@@ -1,7 +1,7 @@
 from google.genai import types
 import time
 
-def evaluate_product_description(description, thinking_placeholder, base_html):
+def evaluate_product_description(description, thinking_placeholder, base_html, top_k=50, top_p=0.95, temperature=0.3):
     from backend.utils.gemini_utils import client  # or however you're loading Gemini
 
     instruction = """
@@ -25,7 +25,15 @@ The language of the product description is Turkish, so you should understand Tur
 ## Output Format
 
 Some products may return error message, in this case, you should return a message saying that there are no description to analyze.
-Your output have to be in English and it should be formal and professional.
+Your output have to be in English.
+Your output have to be formal and professional.
+Your output have to be less then 200 words
+
+## Example Structure
+
+**Brief Summary**
+**Analysis of description**
+**Some good and bad parts of the description as examples**
 """
 
     investigator = "Investigating the product description"
@@ -40,15 +48,15 @@ Your output have to be in English and it should be formal and professional.
         contents=description,
         config=types.GenerateContentConfig(
             system_instruction=instruction,
-            temperature=0.3,
-            max_output_tokens=150,
-            top_p=0.95,
-            top_k=50,
+            temperature=temperature,
+            max_output_tokens=340,
+            top_p=top_p,
+            top_k=top_k,
             seed=42
         ),
     ).text
 
-    base_response = response[:200]
+    base_response = response[:300]
     text += "<br>"
     for char in base_response:
         text += char

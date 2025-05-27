@@ -3,7 +3,7 @@ from google.genai import types
 from pydantic import BaseModel
 import time
 
-def final_verdict_with_reasoning(product_response, seller_response, description_response, thinking_placeholder=None, base_html=None):
+def final_verdict_with_reasoning(product_response, seller_response, description_response, thinking_placeholder=None, base_html=None, top_k=50, top_p=0.95, temperature=0.3):
     ins = """
 ## Task
 
@@ -48,6 +48,7 @@ Don't mention the agents and their names in your response
 
     prompt = f"""
 ### Product Description Investigator Analysis:
+
 {description_response}
 
 ### Product Reviews Investigator Analysis:
@@ -78,10 +79,10 @@ Don't mention the agents and their names in your response
         contents=prompt,
         config=types.GenerateContentConfig(
             system_instruction=ins,
-            temperature=0.1,
+            temperature=temperature,
             max_output_tokens=1000,
-            top_p=0.98,
-            top_k=25,
+            top_p=top_p,
+            top_k=top_k,
             seed=42,
             responseSchema=OverallResult,
             responseMimeType='application/json'
@@ -100,7 +101,7 @@ Don't mention the agents and their names in your response
     else:
         verdict = "Very Safe"
 
-    base_summary = response.summary[:200]
+    base_summary = response.summary[:300]
     text += "<br>"
     for char in base_summary:
         text += char

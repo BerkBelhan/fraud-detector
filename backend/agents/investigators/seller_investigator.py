@@ -1,7 +1,7 @@
 from google.genai import types
 import time
 
-def evaluate_seller_info(info, thinking_placeholder, base_html):
+def evaluate_seller_info(info, thinking_placeholder, base_html, top_k=50, top_p=0.95, temperature=0.3):
     from backend.utils.gemini_utils import client  # or however you're loading Gemini
 
     instruction = """
@@ -23,7 +23,15 @@ The language of the seller information is Turkish, so you should understand Turk
 ## Output Format
 
 If the input is an error message, you should return a message saying that there is no seller information to analyze.
-Your output have to be in English excluding Turkish seller information and it should be formal and professional.
+Your output have to be in English and formal.
+Your output have to be less then 150 words
+
+
+## Example Structure
+
+**Brief Summary**
+**Analysis of seller information**
+**Some good and bad parts of the seller information as examples**
 """
 
     investigator = "Investigating the seller information"
@@ -38,15 +46,15 @@ Your output have to be in English excluding Turkish seller information and it sh
         contents=info,
         config=types.GenerateContentConfig(
             system_instruction=instruction,
-            temperature=0.3,
-            max_output_tokens=150,
-            top_p=0.95,
-            top_k=50,
+            temperature=temperature,
+            max_output_tokens=250,
+            top_p=top_p,
+            top_k=top_k,
             seed=42
         ),
     ).text
 
-    base_response = response[:200]
+    base_response = response[:300]
     text += "<br>"
     for char in base_response:
         text += char

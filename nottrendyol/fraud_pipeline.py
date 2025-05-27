@@ -43,7 +43,7 @@ def run_gemini_agent(label, prompt):
 def extract_json_from_gemini_response(text):
     match = re.search(r"\{.*\}", text, re.DOTALL)
     if not match:
-        print(f"❌ (External Pipeline) Could not extract JSON from Gemini response: {text[:200]}...")
+        print(f"❌ (External Pipeline) Could not extract JSON from Gemini response: {text[:300]}...")
         return {"level": "Error", "reason": "Could not extract JSON structure from AI response."}
     try:
         return json.loads(match.group(0))
