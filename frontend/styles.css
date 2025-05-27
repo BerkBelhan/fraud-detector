@@ -1,0 +1,170 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Marcellus&display=swap');
+
+/* --- NEW: Keyframe animation for fade-in effect --- */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.stApp { 
+    background-color: #181D31;
+    background-image: radial-gradient(circle at top right, rgba(121, 68, 154, 0.3) 0%, transparent 40%),
+                      radial-gradient(circle at bottom left, rgba(88, 24, 69, 0.3) 0%, transparent 40%);
+}
+
+h1.main-title { 
+    font-family: 'Cinzel', serif;
+    font-size: 5.5rem;
+    color: #FFD700;
+    text-align: center;
+    text-shadow: 0 0 1px #FFD700, 0 0 5px #FFD700, 0 0 10px #DAA520, 2px 2px 2px #000;
+    margin-bottom: 30px;
+}
+
+p.genie-speech { 
+    font-family: 'Marcellus', serif; 
+    font-size: 1.3rem; 
+    text-align: left; 
+    font-weight: normal;
+    color: #E0E0E0; 
+    line-height: 1.7; 
+    text-shadow: 1px 1px 2px #000000; 
+}
+
+/* --- NEW: Style for the thinking process bar --- */
+.thinking-bar {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-left: 3px solid #F39C12; /* Orange color for border */
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem; 
+    border-radius: 8px;
+    animation: fadeIn 0.7s ease-in-out; /* Apply the fade-in animation */
+    font-family: 'Marcellus', serif; /* Consistent font */
+    color: #D1D1D1; /* Light grey text */
+    font-size: 1.0rem; /* Slightly smaller font for thinking steps */
+    line-height: 1.7; /* Consistent line height */
+}
+.thinking-bar pre code { /* Ensure preformatted text wraps correctly */
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+    font-family: 'Marcellus', serif !important; /* Ensure font consistency */
+    font-size: 1.0rem !important;
+}
+
+
+/* --- INTERMEDIATE Finding Box Styles --- */
+.finding-box { 
+    background-color: rgba(10, 10, 25, 0.5); 
+    border-radius: 15px;
+    padding: 20px; 
+    margin-top: 15px; 
+    margin-bottom: 15px; 
+    border-width: 1px;
+    border-style: solid;
+    transition: border-color 0.5s, box-shadow 0.5s;
+}
+
+.finding-title {
+    font-family: 'Cinzel', serif;
+    color: #FFD700;
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.finding-box .verdict { 
+    font-family: 'Cinzel', serif; 
+    font-weight: 700; 
+    font-size: 1.5rem; 
+    margin-bottom: 10px; 
+    transition: color 0.5s;
+}
+
+.finding-box .reason { 
+    font-family: 'Marcellus', serif; 
+    font-size: 1.1rem; 
+    color: #D1D1D1; 
+    line-height: 1.6; 
+}
+
+/* --- FINAL Verdict Box Styles --- */
+.final-verdict-box {
+    background: linear-gradient(145deg, #2c3e50, #22303e);
+    border-radius: 20px;
+    padding: 30px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border-width: 2px;
+    border-style: solid;
+}
+
+.final-verdict-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.5rem;
+    color: #FFFFFF;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+}
+
+.final-verdict-text {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 3.0rem;
+    margin-bottom: 15px;
+}
+
+.final-reason {
+    font-family: 'Marcellus', serif;
+    font-size: 1.2rem;
+    color: #E0E0E0;
+    line-height: 1.7;
+    max-width: 80%;
+    margin: auto;
+}
+
+
+/* --- COLOR CODING (Applies to both final and intermediate boxes) --- */
+.safe {
+    border-color: #2ECC71 !important;
+    box-shadow: 0 0 20px rgba(46, 204, 113, 0.5) !important;
+    color: #2ECC71 !important;
+}
+.suspicious {
+    border-color: #F39C12 !important;
+    box-shadow: 0 0 20px rgba(243, 156, 18, 0.5) !important;
+    color: #F39C12 !important;
+}
+.scam {
+    border-color: #E74C3C !important;
+    box-shadow: 0 0 20px rgba(231, 76, 60, 0.5) !important;
+    color: #E74C3C !important;
+}
+.unknown {
+    border-color: #FFD700 !important;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3) !important;
+    color: #FFD700 !important;
+}
+
+/* --- General Elements --- */
+.stButton>button {
+    border: 2px solid #FFD700;
+    background-color: transparent;
+    color: #FFD700;
+    padding: 12px 28px;
+    border-radius: 8px;
+    font-family: 'Cinzel', serif;
+    font-weight: bold;
+    font-size: 1.1rem;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+}
+.stButton>button:hover {
+    background-color: #FFD700;
+    color: #181D31; 
+    box-shadow: 0 0 15px #FFD700;
+}
+
+#MainMenu, footer { 
+    visibility: hidden; 
+}
