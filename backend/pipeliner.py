@@ -48,7 +48,7 @@ def run_analysis_pipeline(product_url, thinking_placeholder, base_html):
 
 {product_paragraph}
 """
-    is_correct, top_k, top_p, temperature = evaluate_seller_analysis(product_controller_content, thinking_placeholder, base_html, top_k=50, top_p=0.9, temperature=.7)
+    is_correct, top_k, top_p, temperature = evaluate_reviews_analysis(product_controller_content, thinking_placeholder, base_html, top_k=50, top_p=0.9, temperature=.7)
     print("\n\nBefore Product Paragraph:", product_paragraph)
     print("\n\nProduct Controller Analysis:", is_correct, top_k, top_p, temperature)
     if not is_correct:
@@ -63,7 +63,7 @@ def run_analysis_pipeline(product_url, thinking_placeholder, base_html):
 
 {seller_paragraph}
 """
-    is_correct, top_k, top_p, temperature = evaluate_description_analysis(seller_controller_content, thinking_placeholder, base_html, top_k=50, top_p=0.9, temperature=.7)
+    is_correct, top_k, top_p, temperature = evaluate_seller_analysis(seller_controller_content, thinking_placeholder, base_html, top_k=50, top_p=0.9, temperature=.7)
     print("\n\nBefore Seller Paragraph:", seller_paragraph)
     print("\n\nSeller Controller Analysis:", is_correct, top_k, top_p, temperature)
     if not is_correct:
