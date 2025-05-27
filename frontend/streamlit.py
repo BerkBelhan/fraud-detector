@@ -4,8 +4,8 @@ import sys
 import os
 import streamlit as st
 import time
-# import json # No longer needed directly here if all parsing is in backend
-# import re   # No longer needed directly here
+import json # No longer needed directly here if all parsing is in backend
+import re   # No longer needed directly here
 
 # --- Path Setup ---
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -59,43 +59,112 @@ def display_finding(icon, title, feedback_dict):
         f'</div>', unsafe_allow_html=True)
 # --- END OF MODIFIED FUNCTION ---
 
+# In frontend/streamlit.py
+
+# ... (other imports including import re, though we won't use re in this specific function now) ...
+
 def display_summary_finding(icon, title, summary_text):
     """
     Displays investigator summaries in a styled box.
-    Replaces newline characters with <br> for better readability.
+    Manually converts common Markdown (bold, newlines) to HTML.
     """
-    formatted_summary_text = str(summary_text).replace("\n", "<br>")
+    processed_text = str(summary_text)
+
+    # 1. Convert newlines to HTML <br> tags first
+    processed_text = processed_text.replace("\n", "<br>")
+
+    # 2. Convert Markdown bold (**text**) to HTML <strong>text</strong>
+    # This is a simpler replacement method. We'll look for patterns.
+    # To avoid issues with single asterisks, we'll be very specific or do it in passes.
+    # Let's try a targeted replacement for "**: " and similar common patterns.
+    
+    # Replace patterns like "**Some Title**<br>" or "**Some Title**:"
+    # This handles cases where bold is used for headings followed by a line break or colon.
+    parts = processed_text.split('<br>')
+    processed_parts = []
+    for part in parts:
+        # Check if a line starts and ends with ** (excluding leading/trailing whitespace on the content)
+        stripped_part = part.strip()
+        if stripped_part.startswith('**') and stripped_part.endswith('**') and len(stripped_part) > 4:
+            content_between_stars = stripped_part[2:-2]
+            processed_parts.append(f"<strong>{content_between_stars}</strong>")
+        else:
+            # Handle cases like "* **Good:** ..." if needed, or just keep the part
+            # For now, let's assume the main issue is just the double-asterisk bolding.
+            # A more robust solution might involve a proper Markdown library if this still fails.
+            processed_parts.append(part)
+    processed_text = "<br>".join(processed_parts)
+    
+    # A simpler, but potentially more error-prone global replacement for any remaining **...**
+    # This might be problematic if there are asterisks used for other things.
+    # If the above doesn't catch all, you could add:
+    # processed_text = processed_text.replace('**', '<strong>', 1).replace('**', '</strong>', 1) # For first pair
+    # This quickly becomes complex if there are multiple bolds per line not caught above.
+
     st.markdown(
         f'<div class="finding-box unknown">'
         f'  <p class="finding-title">{icon} {title}</p>'
-        f'  <p class="reason">{formatted_summary_text}</p>'
+        f'  <p class="reason">{processed_text}</p>'
         f'</div>', unsafe_allow_html=True)
 
+# ... (rest of your streamlit.py code) ...
+
+# C:\SENG472\MainProje\fraud-detector\frontend\streamlit.py
+# (Keep all other imports and functions the same)
+
+# --- UI Helper Functions ---
+# load_external_css(...) STAYS THE SAME
+# display_finding(...) STAYS THE SAME (it should already color the verdict text)
+# display_summary_finding(...) STAYS THE SAME
+
+# --- MODIFIED FUNCTION ---
 def display_final_verdict(final_verdict_content, is_external_pipeline=False):
     title = "Final Verdict"
     text_to_display = ""
-    verdict_class_override = None
+    determined_verdict_class = "unknown" # Default class
 
     if is_external_pipeline:
+        # For the external pipeline, final_verdict_content is a dictionary
         level = final_verdict_content.get("final_level", "Error")
         reason = final_verdict_content.get("summary_reason", "Analysis failed.")
-        text_to_display = f"{level} - {reason}"
         
         level_lower = str(level).lower()
-        if "safe" in level_lower: verdict_class_override = "safe"
-        elif "suspicious" in level_lower: verdict_class_override = "suspicious"
-        elif "scam" in level_lower or "error" in level_lower: verdict_class_override = "scam"
-        else: verdict_class_override = "unknown"
+        if "safe" in level_lower: determined_verdict_class = "safe"
+        elif "suspicious" in level_lower: determined_verdict_class = "suspicious"
+        elif "scam" in level_lower or "error" in level_lower: determined_verdict_class = "scam"
+        
+        # Wrap the level in a span with the determined class for coloring
+        text_to_display = f"<span class='{determined_verdict_class}'>{level}</span> - {reason}"
     else:
+        # For the internal pipeline, final_verdict_content is a pre-formatted string
         text_to_display = final_verdict_content
+        # Try to determine the class from the content string for the box and text
+        content_lower = str(final_verdict_content).lower()
+        if "very safe" in content_lower or "likely safe" in content_lower : determined_verdict_class = "safe"
+        elif "suspicious" in content_lower: determined_verdict_class = "suspicious"
+        elif "likely scam" in content_lower: determined_verdict_class = "scam"
+        # If you want the text itself colored, you can add the class to the <p> tag below
+        # For more precise coloring of just the verdict phrase, it would require
+        # final_judge.py to return the verdict separately or more complex regex here.
 
-    html_class = f"final-verdict-box {verdict_class_override if verdict_class_override else ''}"
+    # The final-verdict-box class will handle border and shadow
+    # The final-verdict-text class can now also use the determined_verdict_class for text color
+    # Ensure your CSS has .final-verdict-text.safe, .final-verdict-text.suspicious etc. OR
+    # that .safe, .suspicious, .scam directly apply text color (which they do in your provided CSS)
+    
+    # The box itself will get the border/shadow from this class
+    # The text inside will get its color if the .safe, .suspicious, .scam classes in CSS also define 'color'
+    # Your CSS already does this for .safe, .suspicious, .scam, so this should work.
     st.markdown(
-        f'<div class="{html_class.strip()}">'
+        f'<div class="final-verdict-box {determined_verdict_class}">'
         f'  <p class="final-verdict-title">{title}</p>'
-        f'  <p class="final-verdict-text">{text_to_display}</p>'
+        f'  <p class="final-verdict-text {determined_verdict_class}">{text_to_display}</p>' # Added class here for text color
         f'</div>', unsafe_allow_html=True)
+# --- END OF MODIFIED FUNCTION ---
 
+# --- Main App Logic ---
+# (The rest of your streamlit.py code remains the same)
+# ...
 # --- Main App Logic ---
 if 'view' not in st.session_state:
     st.session_state.view = 'input'

@@ -10,7 +10,8 @@ def evaluate_final_judge_analysis(content, thinking_placeholder, base_html, top_
 ## Task
 
 You are an agent who controls an overall product and seller analysis is correctly written or not.
-Your decision will change the parameters of the analysis agent. 
+Your decision will change the parameters of the analysis agent.
+In analysis, you have to check logical consistency, grammar, and whether the analysis is informative.
 If the analysis is not correctly written, the agent will be asked to rewrite it and you will decide topK, topP and temperature parameters of the agent.
 Be careful while making your decision, because it will affect the final decision of the product.
 
