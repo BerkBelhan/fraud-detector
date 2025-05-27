@@ -5,9 +5,11 @@ import time
 
 def final_verdict_with_reasoning(product_response, seller_response, description_response, thinking_placeholder=None, base_html=None):
     ins = """
+## Task
+
 You are the final decision-making agent in a multi-agent fraud detection system for e-commerce products and sellers.
 
-There are two agents:
+There are many agents that you will get data from, and they are:
 
 - Product Description Investigator
 - Product Reviews Investigator
@@ -20,19 +22,28 @@ Your job is to:
 3. Provide a concise explanation of your verdict, focusing on key points from both analyses.
 4. Always give examples for your reasoning, such as specific comments or seller behaviors that influenced your decision.
 
+
+## Key Points
+
 Be as objective as possible, but also consider the overall context of the product and seller.
+You should return a brief summary of your analysis, an overall score with review, and a list of reasonings ( at least 7 reasons ) with examples that led to your decision.
+Reasonings should be sorted from the most important to the least important which represents the score accurately.
+Your overall score review should be related with agents' analyses.
+You have to provide a small suggestion by agents for the users who wants to buy this product.
+
+## Input Prompt
+
+Your input will be pure English excluding Turkish comments and seller information.
+
+## Output Format
+
 Your output should be well formatted and easy to understand.
 Your output have to be in English.
-Your input will be pure English excluding Turkish comments and seller information.
 Be formal and professional in your tone.
 
-In the end, you should return a brief summary of your analysis, an overall score with review, and a list of reasonings ( at least 7 reasons ) with examples that led to your decision.
-Your overall score review should be related with agents' analyses.
-
-In addition, you have to provide a small suggestion by agents for the users who wants to buy this product.
+## Rule
 
 Don't mention the agents and their names in your response
-Reasonings should be sorted from the most important to the least important which represents the score accurately.
 """
 
     prompt = f"""
@@ -55,6 +66,7 @@ Reasonings should be sorted from the most important to the least important which
         reasonings_with_examples: list[str]
         suggestion: str
 
+
     final_judge = "Final evaluations"
     text = ""
     for char in final_judge:
@@ -67,9 +79,9 @@ Reasonings should be sorted from the most important to the least important which
         config=types.GenerateContentConfig(
             system_instruction=ins,
             temperature=0.1,
-            max_output_tokens=2000,
-            top_p=0.8,
-            top_k=3,
+            max_output_tokens=1000,
+            top_p=0.98,
+            top_k=25,
             seed=42,
             responseSchema=OverallResult,
             responseMimeType='application/json'
@@ -77,6 +89,16 @@ Reasonings should be sorted from the most important to the least important which
     )
 
     response: OverallResult = response.parsed
+
+    overall_score = response.overall_score
+    if overall_score <= 24:
+        verdict = "Likely Scam"
+    elif overall_score <= 49:
+        verdict = "Suspicious"
+    elif overall_score <= 74:
+        verdict = "Likely Safe"
+    else:
+        verdict = "Very Safe"
 
     base_summary = response.summary[:200]
     text += "<br>"
@@ -95,6 +117,8 @@ Reasonings should be sorted from the most important to the least important which
 ### Summary of Analysis
 
 {response.summary}
+
+### {verdict}
 
 ### Overall Trustworthy Score: {response.overall_score}/100
 

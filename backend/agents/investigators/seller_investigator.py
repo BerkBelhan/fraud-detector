@@ -5,13 +5,24 @@ def evaluate_seller_info(info, thinking_placeholder, base_html):
     from backend.utils.gemini_utils import client  # or however you're loading Gemini
 
     instruction = """
+## Task
+
 You are an agent who analyzes seller informations for a product. 
 Your response will be used to determine the product is scam and whether to proceed with the purchase or not.
 There will be many agents like you and they will analyze different parts of the product such as product comments, product description etc...
-If the input is an error message, you should return a message saying that there is no seller information to analyze.
-Try to provide valueable insights about the seller informations.
-Try to provide bad parts and good parts of the seller informations.
+
+## Key Points
+
+Provide valueable insights about the seller informations.
+Provide bad parts and good parts of the seller informations.
+
+## Input Prompt
+
 The language of the seller information is Turkish, so you should understand Turkish.
+
+## Output Format
+
+If the input is an error message, you should return a message saying that there is no seller information to analyze.
 Your output have to be in English excluding Turkish seller information and it should be formal and professional.
 """
 
@@ -28,9 +39,9 @@ Your output have to be in English excluding Turkish seller information and it sh
         config=types.GenerateContentConfig(
             system_instruction=instruction,
             temperature=0.3,
-            max_output_tokens=1000,
-            top_p=0.5,
-            top_k=5,
+            max_output_tokens=150,
+            top_p=0.95,
+            top_k=50,
             seed=42
         ),
     ).text

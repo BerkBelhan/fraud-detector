@@ -15,15 +15,16 @@ def run_analysis_pipeline(product_url, thinking_placeholder, base_html):
 
     product_comments = all_data["reviews"]
     seller_info = all_data["seller"]
-    questions = all_data["questions"]
+    questions = all_data["questions"] # @todo : Solve questions problem and apply them
     description = all_data["description"]
 
     # Step 2: Investigators (pass directly to the functions)
     description_paragraph = evaluate_product_description(description, thinking_placeholder, base_html)
     product_paragraph = evaluate_product_comments(product_comments, thinking_placeholder, base_html)
     seller_paragraph = evaluate_seller_info(seller_info, thinking_placeholder, base_html)
+    # @todo : Apply questions analysis here
 
-
+    # @todo : Apply controllers here
     # Step 3: Controllers
     #product_json = classify_product_analysis(product_paragraph)
     #seller_json = classify_seller_analysis(seller_paragraph)
@@ -39,5 +40,5 @@ def run_analysis_pipeline(product_url, thinking_placeholder, base_html):
         "Seller Paragraph": seller_paragraph,
         "Product JSON": dict(),
         "Seller JSON": dict(),
-        "Description Info": all_data["description"] 
+        "Description Info": all_data["description"]
     }
