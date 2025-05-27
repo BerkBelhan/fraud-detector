@@ -2,7 +2,7 @@ from google.genai import types
 import time
 
 def evaluate_seller_info(info, thinking_placeholder, base_html, top_k=50, top_p=0.95, temperature=0.3):
-    from backend.utils.gemini_utils import client  # or however you're loading Gemini
+    from backend.utils.gemini_utils import client  
 
     instruction = """
 ## Task

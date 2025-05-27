@@ -23,6 +23,7 @@ def run_analysis_pipeline(product_url, thinking_placeholder, base_html):
     product_paragraph = evaluate_product_comments(product_comments, thinking_placeholder, base_html, top_k=50, top_p=0.9, temperature=.7)
     seller_paragraph = evaluate_seller_info(seller_info, thinking_placeholder, base_html, top_k=50, top_p=0.9, temperature=.7)
 
+    # Step 3: Controllers
     decription_controller_content = f"""
 ### Data
 
