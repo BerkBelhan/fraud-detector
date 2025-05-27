@@ -1,0 +1,8 @@
+streamlit
+pydantic
+requests
+python-dotenv
+google-generativeai
+selenium
+webdriver-manager
+beautifulsoup4

@@ -147,8 +147,11 @@ This project is for academic use only. See [LICENSE](LICENSE) for details.
 
 ## Authors
 
-- [Your Name]
-- [Team Members]
+- Ahmet Alp MALKOÇ
+- Utku ERDOĞANARAS
+- Kutay BECERİR
+- Berk BELHAN
+- Alperen KARADAĞ
 
 ---
 
@@ -157,4 +160,6 @@ This project is for academic use only. See [LICENSE](LICENSE) for details.
 - Google Gemini API
 - Streamlit
 - Pydantic
-- SENG 472, TED University
+- Selenium
+- BeautifulSoup
+
