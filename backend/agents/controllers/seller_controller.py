@@ -10,7 +10,8 @@ def evaluate_seller_analysis(content, thinking_placeholder, base_html, top_k=50,
 ## Task
 
 You are an agent who controls a product seller information analysis is correctly written or not.
-Your decision will change the parameters of the analysis agent. 
+Your decision will change the parameters of the analysis agent.
+In analysis, you have to check logical consistency, grammar, and whether the analysis is informative.
 If the analysis is not correctly written, the agent will be asked to rewrite it and you will decide topK, topP and temperature parameters of the agent.
 
 ## Input
