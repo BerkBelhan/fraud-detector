@@ -1,0 +1,17 @@
+{
+    "manifest_version": 3,
+    "name": "Scaminator",
+    "version": "1.0",
+    "description": "Evaluate fraud risk of the current product page.",
+    "permissions": ["scripting", "tabs", "activeTab"],
+    "background": {
+      "service_worker": "background.js"
+    },
+    "action": {
+      "default_popup": "popup.html",
+      "default_icon": "icon.png"
+    },
+    "icons": {
+      "48": "icon.png"
+    }
+  }
