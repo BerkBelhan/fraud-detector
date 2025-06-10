@@ -4,6 +4,9 @@
     "version": "1.0",
     "description": "Evaluate fraud risk of the current product page.",
     "permissions": ["scripting", "tabs", "activeTab"],
+    "host_permissions": [
+        "http://127.0.0.1:8501/"
+    ],
     "background": {
       "service_worker": "background.js"
     },
