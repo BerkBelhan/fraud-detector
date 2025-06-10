@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Marcellus&display=swap');
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+body { background-color: #181D31; color: #E0E0E0; width: 450px; padding: 15px; font-family: 'Marcellus', serif; }
+.main-container { display: flex; gap: 15px; align-items: flex-start; }
+.left-col { flex-basis: 30%; }
+.right-col { flex-basis: 70%; }
+#genie-img { width: 100%; }
+.genie-speech { font-size: 1.1rem; line-height: 1.6; }
+.processing-text { font-style: italic; font-size: 1rem; }
+.hidden { display: none; }
+
+.thinking-bar { background-color: rgba(255, 255, 255, 0.05); border-left: 3px solid #F39C12; padding: 0.8rem 1rem; margin-bottom: 1rem; border-radius: 8px; animation: fadeIn 0.7s ease-in-out; font-size: 0.9rem; line-height: 1.6; }
+.thinking-bar pre { margin: 0; white-space: pre-wrap !important; word-wrap: break-word !important; font-family: 'Marcellus', serif !important; }
+
+#scan-button { width: 100%; border: 2px solid #FFD700; background-color: transparent; color: #FFD700; padding: 10px; border-radius: 8px; font-family: 'Cinzel', serif; font-weight: bold; font-size: 1rem; cursor: pointer; transition: all 0.3s ease-in-out; }
+#scan-button:hover { background-color: #FFD700; color: #181D31; }
+
+.finding-box, .final-verdict-box { background-color: rgba(10, 10, 25, 0.5); border-radius: 15px; padding: 15px; margin-top: 10px; border-width: 1px; border-style: solid; }
+.final-verdict-box { border-width: 2px; padding: 20px; }
+.finding-title, .final-verdict-title { font-family: 'Cinzel', serif; color: #FFD700; font-size: 1rem; margin: 0 0 10px 0; font-weight: bold; }
+.final-verdict-title { font-size: 1.2rem; text-align: center; }
+.verdict, .final-verdict-text { font-family: 'Cinzel', serif; font-weight: 700; font-size: 1.3rem; margin: 0 0 8px 0; }
+.final-verdict-text { font-size: 1.8rem; text-align: center; }
+
+.reason, .final-reason {
+    font-family: 'Marcellus', serif; 
+    font-size: 0.95rem; 
+    color: #D1D1D1; 
+    line-height: 1.5; 
+    margin: 0;
+    text-align: left; /* Aligns text to the left */
+    /* --- THIS IS THE FIX --- */
+    white-space: pre-wrap; /* Preserves newlines and spaces, and wraps text */
+    word-wrap: break-word; /* Ensures long words don't overflow */
+}
+
+/* --- Color Coding --- */
+.safe { border-color: #2ECC71 !important; }
+.suspicious { border-color: #F39C12 !important; }
+.scam { border-color: #E74C3C !important; }
+.unknown { border-color: #FFD700 !important; }
+
+/* The color class will be on the parent box, so we need to target the text elements inside */
+.finding-box.safe .verdict, .final-verdict-box.safe .final-verdict-text { color: #2ECC71 !important; }
+.finding-box.suspicious .verdict, .final-verdict-box.suspicious .final-verdict-text { color: #F39C12 !important; }
+.finding-box.scam .verdict, .final-verdict-box.scam .final-verdict-text { color: #E74C3C !important; }
+.finding-box.unknown .verdict, .final-verdict-box.unknown .final-verdict-text { color: #FFD700 !important; }
+.final-verdict-box .final-reason { color: #E0E0E0; }
+
+/* Keep title text color consistent */
+.finding-box .finding-title, .final-verdict-box .final-verdict-title { color: #FFD700; }

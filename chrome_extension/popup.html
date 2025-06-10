@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Scaminator</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="main-container">
+    <div class="left-col">
+      <img src="icon.png" alt="Scaminator Genie" id="genie-img">
+    </div>
+    <div class="right-col">
+      <div id="welcome-view">
+        <p class="genie-speech">Present me a product page, and I shall unveil its secrets.</p>
+        <button id="scan-button">Unveil the Truth!</button>
+      </div>
+      <div id="processing-view" class="hidden">
+        <div id="thinking-placeholder"></div>
+        <p class="genie-speech processing-text">The mists of the marketplace swirl...</p>
+      </div>
+      <div id="results-view" class="hidden">
+        </div>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
